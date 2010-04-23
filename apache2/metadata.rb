@@ -79,7 +79,7 @@ attribute "apache/listen_ports",
   :display_name => "Apache Listen Ports",
   :description => "Ports that Apache should listen on",
   :type => "array",
-  :default => [ "80", "443" ]
+  :default => [ "80" ]
 
 attribute "apache/contact",
   :display_name => "Apache Contact",
@@ -114,12 +114,12 @@ attribute "apache/servertokens",
 attribute "apache/serversignature",
   :display_name => "Apache Server Signature",
   :description => "Configure footer on server-generated documents",
-  :default => "On"
+  :default => "Off"
 
 attribute "apache/traceenable",
   :display_name => "Apache Trace Enable",
   :description => "Determine behavior of TRACE requests",
-  :default => "On"
+  :default => "Off"
 
 attribute "apache/allowed_openids",
   :display_name => "Apache Allowed OpenIDs",
@@ -134,12 +134,12 @@ attribute "apache/prefork",
 attribute "apache/prefork/startservers",
   :display_name => "Apache Prefork MPM StartServers",
   :description => "Number of MPM servers to start",
-  :default => "16"
+  :default => "32"
 
 attribute "apache/prefork/minspareservers",
   :display_name => "Apache Prefork MPM MinSpareServers",
   :description => "Minimum number of spare server processes",
-  :default => "16"
+  :default => "32"
 
 attribute "apache/prefork/maxspareservers",
   :display_name => "Apache Prefork MPM MaxSpareServers",
