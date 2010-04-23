@@ -46,5 +46,14 @@ ServerSignature <%= @node[:apache][:serversignature] %>
 # Set to one of:  On | Off | extended
 #
 #TraceEnable Off
+#
+# With HTTP TRACE functionality enabled by default, an attacker can compromise 
+# user accounts by gaining access to sensitive header information. The attacker 
+# may exploit this issue to steal cookie-based authentication credentials and 
+# carry out other attacks.
+# Originally reported by Apple
+# http://www.securityfocus.com/bid/36990/discuss
+#
+
 TraceEnable <%= @node[:apache][:traceenable] %> 
 
