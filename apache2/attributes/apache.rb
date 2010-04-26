@@ -75,3 +75,9 @@ set_unless[:apache][:worker][:minsparethreads] = 64
 set_unless[:apache][:worker][:maxsparethreads] = 192
 set_unless[:apache][:worker][:threadsperchild] = 64
 set_unless[:apache][:worker][:maxrequestsperchild] = 0
+
+# Web App Attributes
+set_unless[:apache][:server_name] = ""  
+set_unless[:apache][:server_aliases] = ""
+set_unless[:apache][:docroot] = "/var/www"
+set_unless[:apache][:name] = "site"

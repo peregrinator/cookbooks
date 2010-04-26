@@ -50,6 +50,26 @@ attribute "apache",
   :description => "Hash of Apache attributes",
   :type => "hash"
 
+attribute "apache/server_name",
+  :display_name => "Apache Directory",
+  :description => "Server name for Apache web app configuration",
+  :default => ""
+  
+attribute "apache/server_aliases",
+  :display_name => "Apache Directory",
+  :description => "Server alias for Apache web app configuration",
+  :default => ""
+  
+attribute "apache/docroot",
+  :display_name => "Apache Directory",
+  :description => "Docroot for Apache web app configuration",
+  :default => "/var/www"
+  
+attribute "apache/name",
+  :display_name => "Apache Vhost Name",
+  :description => "Name for Apache web app configuration",
+  :default => "site"
+
 attribute "apache/dir",
   :display_name => "Apache Directory",
   :description => "Location for Apache configuration",
