@@ -159,11 +159,17 @@ template "#{node[:apache][:dir]}/ports.conf" do
   notifies :restart, resources(:service => "apache2")
 end
 
-template "#{node[:apache][:dir]}/sites-available/default" do
-  source "default-site.erb"
+template "#{node[:apache][:dir]}/sites-available/#{node[:apache][:name]}" do
+  source "web_app.conf.erb"
   owner "root"
   group "root"
   mode 0644
+  variables({
+      :server_name    => node[:apache][:server_name],
+      :server_aliases => node[:apache][:server_aliases],
+      :docroot        => node[:apache][:docroot],
+      :name           => node[:apache][:name]
+    })
   notifies :restart, resources(:service => "apache2")
 end
 
@@ -183,8 +189,16 @@ include_recipe "apache2::mod_negotiation"
 include_recipe "apache2::mod_setenvif"
 include_recipe "apache2::mod_log_config" if platform?("centos", "redhat", "suse")
 
-# uncomment to get working example site on centos/redhat/fedora
-#apache_site "default"
+# enable mods
+node[:apache][:enable_mods].each do |mod|
+  apache_module mod do
+    action :enable
+  end
+end
+
+apache_site node[:apache][:name] do
+  action :enable
+end
 
 service "apache2" do
   action :start
