@@ -18,32 +18,56 @@
 #
 
 
-if (node[:ec2] && ! FileTest.directory?(node[:mysql][:ec2_path]))
+if node[:ec2]
 
-  service "mysql" do
-    action :stop
+  unless FileTest.directory?(node[:mysql][:ec2_path])
+    execute "install-mysql" do
+      command "mv #{node[:mysql][:datadir]} #{node[:mysql][:ec2_path]}"
+      not_if do FileTest.directory?(node[:mysql][:ec2_path]) end
+    end
+
+    directory node[:mysql][:ec2_path] do
+      owner "mysql"
+      group "mysql"
+    end
   end
 
-  execute "install-mysql" do
-    command "mv #{node[:mysql][:datadir]} #{node[:mysql][:ec2_path]}"
-    not_if do FileTest.directory?(node[:mysql][:ec2_path]) end
-  end
-
-  directory node[:mysql][:ec2_path] do
-    owner "mysql"
-    group "mysql"
+  %w(/etc/mysql /var/lib/mysql /var/log/mysql).each do |path|
+    directory path do
+      owner "mysql"
+      group "mysql"
+      mode "0755"
+      action :create
+      not_if do FileTest.directory?(path) end
+    end
   end
 
   mount node[:mysql][:datadir] do
     device node[:mysql][:ec2_path]
     fstype "none"
-    options "bind,rw"
-    action :mount
+    options "bind"
+    action [:enable, :mount]
+    # Do not execute if its already mounted (ubunutu/linux only)
+    not_if "cat /proc/mounts | grep #{node[:mysql][:datadir]}"
   end
-
-  service "mysql" do
-    action :start
+  
+  mount "/etc/mysql" do
+    device "/vol/etc/mysql"
+    fstype "none"
+    options "bind"
+    action [:enable, :mount]
+    # Do not execute if its already mounted (ubunutu/linux only)
+    not_if "cat /proc/mounts | grep /etc/mysql"
   end
-
+  
+  mount "/var/log/mysql" do
+    device "/vol/log/mysql"
+    fstype "none"
+    options "bind"
+    action [:enable, :mount]
+    # Do not execute if its already mounted (ubunutu/linux only)
+    not_if "cat /proc/mounts | grep /var/log/mysql"
+  end
+  
 end
 
