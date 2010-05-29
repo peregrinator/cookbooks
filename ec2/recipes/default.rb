@@ -16,4 +16,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+directory "/vol" do
+  owner "ubuntu"
+  group "ubuntu"
+  mode "0755"
+  action :create
+  not_if "test -d /vol"
+end
 
+mount "/vol" do
+  device "/dev/sdh"
+  fstype "xfs"
+  options "rw noatime"
+  action [:enable, :mount]
+  # Do not execute if its already mounted (ubunutu/linux only)
+  not_if "cat /proc/mounts | grep /vol"
+end
