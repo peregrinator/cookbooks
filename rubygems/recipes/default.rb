@@ -18,8 +18,12 @@
 # limitations under the License.
 #
 
-%w{ rubyforge.org opscode.com }.each do |domain|
-  execute "gem sources --add http://gems.#{domain}" do
-    not_if "gem sources --list | grep gems.#{domain}"
+%w{ gems.github.com gems.opscode.com rubygems.org}.each do |domain|
+  execute "gem sources --add http://#{domain}" do
+    not_if "gem sources --list | grep #{domain}"
   end
+end
+
+execute "gem update --system" do
+  not_if "gem --version | grep 1.3.6"
 end
