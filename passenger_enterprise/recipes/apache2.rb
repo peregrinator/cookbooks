@@ -24,7 +24,7 @@
 # limitations under the License.
 
 include_recipe "passenger_enterprise"
-include_recipe "apache2"
+# include_recipe "apache2"
 
 %w{ apache2-threaded-dev libapr1-dev libaprutil1-dev }.each do |pkg|
   package pkg do
@@ -44,7 +44,7 @@ template "#{node[:apache][:dir]}/mods-available/passenger.load" do
   mode 0755
 end
 
-template "#{node[:apache][:dir]}/mods-available/passenger.conf" do
+template "#{node[:apache][:dir]}/conf.d/passenger.conf" do
   source "passenger.conf.erb"
   owner "root"
   group "root"
