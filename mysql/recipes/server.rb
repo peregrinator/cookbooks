@@ -43,6 +43,10 @@ when "debian","ubuntu"
   end
 end
 
+package "mysql-server-5.1" do
+  action :install
+end
+
 package "mysql-server" do
   action :install
 end
