@@ -18,3 +18,10 @@
 #
 
 gem_package "capistrano"
+
+cap_setup do
+  path      "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}"
+  owner     'deploy'
+  group     'deploy'
+  appowner  'deploy'
+end
