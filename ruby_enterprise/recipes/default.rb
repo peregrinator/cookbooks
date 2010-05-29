@@ -47,3 +47,11 @@ bash "Install Ruby Enterprise Edition" do
     system("#{node[:ruby_enterprise][:install_path]}/bin/ree-version | grep -q '#{node[:ruby_enterprise][:version]}$'")
   end
 end
+
+binaries = %w(erb gem irb passenger-config passenger-install-apache2-module passenger-install-nginx-module passenger-make-enterprisey passenger-memory-stats passenger-spawn-server passenger-status passenger-stress-test rackup rake rdoc ree-version ri ruby testrb)
+binaries.each do |binary|
+  link "/usr/bin/#{binary}" do
+    to "#{node[:ruby_enterprise][:install_path]}/bin/#{binary}"
+  end
+  
+end
