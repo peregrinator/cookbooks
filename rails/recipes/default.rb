@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-include_recipe "ruby"
+#include_recipe "ruby"
 
 %w{ rails actionmailer actionpack activerecord activesupport activeresource }.each do |rails_gem|
   gem_package rails_gem do
