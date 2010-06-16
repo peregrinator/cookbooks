@@ -29,3 +29,10 @@
     end
   end
 end
+
+template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
+  variables :password => node[:mysql][:server_root_password]
+  source "database.yml.erb"
+  mode 0644
+  not_if do File.exists?("#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml") end
+end
