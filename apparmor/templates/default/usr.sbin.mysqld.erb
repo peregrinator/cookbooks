@@ -1,0 +1,38 @@
+# Last Modified: Sat Mar 27 23:28:56 2010
+#include <tunables/global>
+
+/usr/sbin/mysqld {
+  #include <abstractions/base>
+  #include <abstractions/mysql>
+  #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
+  #include <abstractions/winbind>
+
+  capability dac_override,
+  capability setgid,
+  capability setuid,
+  capability sys_resource,
+
+  network tcp,
+
+
+  /etc/hosts.allow r,
+  /etc/hosts.deny r,
+  /etc/mysql/*.pem r,
+  /etc/mysql/conf.d/ r,
+  /etc/mysql/conf.d/* r,
+  /etc/mysql/my.cnf r,
+  owner /sys/devices/system/cpu/ r,
+  /usr/sbin/mysqld mr,
+  /usr/share/mysql/** r,
+  /var/lib/mysql/ r,
+  /var/lib/mysql/** rwk,
+  /var/log/mysql.err rw,
+  /var/log/mysql.log rw,
+  /var/log/mysql/ r,
+  /var/log/mysql/* rw,
+  /var/run/mysqld/mysqld.pid w,
+  /var/run/mysqld/mysqld.sock w,
+  /var/www/apps/** r,
+
+}
