@@ -19,7 +19,10 @@
 
 
 if node[:ec2]
-
+  service "mysql" do
+    action :stop
+  end
+  
   unless FileTest.directory?(node[:mysql][:ec2_path])
     execute "install-mysql" do
       command "mv #{node[:mysql][:datadir]} #{node[:mysql][:ec2_path]}"
@@ -69,5 +72,14 @@ if node[:ec2]
     not_if "cat /proc/mounts | grep /var/log/mysql"
   end
   
+  %w(/etc/mysql /var/lib/mysql /var/log/mysql).each do |path|
+    directory path do
+      owner "mysql"
+      group "mysql"
+    end
+  end
+  
+  service "mysql" do
+    action :start
+  end
 end
-
