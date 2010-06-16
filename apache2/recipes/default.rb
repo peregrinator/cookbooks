@@ -200,13 +200,19 @@ apache_site node[:apache][:name] do
   action :enable
 end
 
-mount "/var/log/apache2" do
-  device "/vol/log/apache2"
-  fstype "none"
-  options "bind"
-  action [:enable, :mount]
-  # Do not execute if its already mounted (ubunutu/linux only)
-  not_if "cat /proc/mounts | grep /var/log/apache2"
+apache_site "000-default" do
+  action :disable
+end
+
+if node[:ec2]
+  mount "/var/log/apache2" do
+    device "/vol/log/apache2"
+    fstype "none"
+    options "bind"
+    action [:enable, :mount]
+    # Do not execute if its already mounted (ubunutu/linux only)
+    not_if "cat /proc/mounts | grep /var/log/apache2"
+  end
 end
 
 
