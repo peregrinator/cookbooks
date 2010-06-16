@@ -59,7 +59,7 @@ define :cap_setup, :path => nil, :owner => "root", :group => "root", :appowner =
   end
   
   # create directories in shared
-  %w{ log system data tmp db/sphinx/production }.each do |dir|
+  %w{ log config system data tmp db/sphinx/production }.each do |dir|
     directory "#{params[:path]}/shared/#{dir}" do
       owner params[:appowner]
       group params[:group]
