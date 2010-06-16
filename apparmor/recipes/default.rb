@@ -21,6 +21,28 @@
 case node[:platform]
 when "ubuntu"
   service "apparmor" do
-    action [ :stop, :disable ]
+    enabled true
+    running true
+    supports :start => true, :stop => true, :restart => true, :reload => true, :status => true
+    action [:reload, :restart]
+  end
+end
+
+directory "/etc/apparmor.d" do
+  owner "root"
+  group "root"
+  mode "0755"
+  action :create
+  not_if "test -d /etc/apparmor.d"
+end
+
+
+%w(usr.sbin.mysqld).each do |file|
+  template "/etc/apparmor.d/#{file}" do
+    source "#{file}.erb"
+    owner "root"
+    group "root"
+    mode "0644"
+    notifies :restart, resources(:service => "apparmor")
   end
 end
