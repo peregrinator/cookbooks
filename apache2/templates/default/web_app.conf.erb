@@ -1,4 +1,4 @@
-<VirtualHost *:80>
+<VirtualHost *:<%=@node[:apache][:vhost_port]%>>
   ServerName <%= @node[:apache][:server_name] %>
   ServerAlias <% @node[:apache][:server_aliases].each do |a| %><%= "#{a}" %> <% end %>
   DocumentRoot <%= @node[:apache][:docroot] %>
