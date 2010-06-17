@@ -48,4 +48,5 @@ bash "Update rubygems to 1.3.6 from source" do
     ::File.exists?("/tmp/rubygems-1.3.6/setup.rb") &&
     system("gem -v | grep -q '1.3.6'")
   end
+  ignore_failure true #TODO this isn't respecting 
 end
