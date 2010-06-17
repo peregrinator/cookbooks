@@ -1,11 +1,21 @@
 backend default {
-        .host = "localhost";
-        .port = "8080";
+  .host = "<%= @node[:varnish][:proxy_host] %>";
+  .port = "<%= @node[:varnish][:proxy_port] %>";
 }
 
 sub vcl_fetch {
-        # force minimum ttl of 120 seconds
-        if (obj.ttl < 120s) {
-                set obj.ttl = 120s;
-        }
+    if (req.url ~ "^/images" || req.url ~ "^/javascripts" || req.url ~ "^/flash") {
+        return(deliver);
+    }
+    else {
+        /* Do ESI processing */
+        esi;
+    }
 }
+
+sub vcl_recv {
+    # Add a unique header containing the client address
+    remove req.http.X-Forwarded-For;
+    set    req.http.X-Forwarded-For = client.ip;
+}
+
