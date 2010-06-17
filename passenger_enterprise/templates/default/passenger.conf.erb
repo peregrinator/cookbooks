@@ -1,2 +1,11 @@
 PassengerRoot <%= @node[:passenger_enterprise][:root_path] %>
 PassengerRuby <%= @node[:ruby_enterprise][:ruby_bin] %>
+
+RailsEnv <%= @node[:rails][:environment] %>
+
+# Let's keep our processes spinning for a long time since the site is low traffic and we don't want slow requests
+PassengerPoolIdleTime <%= @node[:passenger_enterprise][:pool_idle_time] %>
+# In case of memory leaks lets only serve 250 requests and kill the thread
+PassengerMaxRequests <%= @node[:passenger_enterprise][:max_requests] %>
+# On a 256MB slice running MySQL the recommended setting is 2
+PassengerMaxPoolSize <%= @node[:passenger_enterprise][:max_pool_size] %>
