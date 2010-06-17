@@ -86,10 +86,12 @@ end
 
 group "mysql" do
   gid 1100
+  not_if "cat /etc/group | grep deploy"
 end
 
 group "deploy" do
   gid 1002
+  not_if "cat /etc/group | grep deploy"
 end
 
 ####################################
@@ -149,6 +151,7 @@ end
 # add deploy to sudoers without password required
 execute "add deploy to sudoers" do
   command "cp /etc/sudoers /etc/sudoers.bak && echo 'deploy  ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers"
+  not_if "cat /etc/sudoers | grep \"deploy  ALL=(ALL) NOPASSWD:ALL\""
 end
 
 
