@@ -36,3 +36,30 @@ template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/
   mode 0644
   not_if do File.exists?("#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml") end
 end
+
+gem_package "bundler" do
+  version "0.9.26"
+end
+
+link "/usr/bin/bundle" do
+  to "#{node[:ruby_enterprise][:install_path]}/bin/bundle"
+end
+
+execute "bundle install" do
+  command "bundle install /home/deploy/.bundle --gemfile #{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/Gemfile --without development test"
+  user "#{node[:capistrano][:deploy_user]}"
+  group "#{node[:capistrano][:deploy_user]}"
+  action :nothing
+end
+ 
+%w(Gemfile Gemfile.lock).each do |f|
+  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/#{f}" do
+    source "#{f}"
+    notifies :run, resources(:execute => "bundle install")
+  end
+  
+  file "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/#{f}" do
+    owner "#{node[:capistrano][:deploy_user]}"
+    group "#{node[:capistrano][:deploy_user]}"
+  end
+end
