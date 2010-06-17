@@ -54,14 +54,14 @@ if node[:ec2]
     not_if "cat /proc/mounts | grep #{node[:mysql][:datadir]}"
   end
   
-  mount "/etc/mysql" do
-    device "/vol/etc/mysql"
-    fstype "none"
-    options "bind"
-    action [:enable, :mount]
-    # Do not execute if its already mounted (ubunutu/linux only)
-    not_if "cat /proc/mounts | grep /etc/mysql"
-  end
+  # mount "/etc/mysql" do
+  #   device "/vol/etc/mysql"
+  #   fstype "none"
+  #   options "bind"
+  #   action [:enable, :mount]
+  #   # Do not execute if its already mounted (ubunutu/linux only)
+  #   not_if "cat /proc/mounts | grep /etc/mysql"
+  # end
   
   mount "/var/log/mysql" do
     device "/vol/log/mysql"
@@ -72,10 +72,17 @@ if node[:ec2]
     not_if "cat /proc/mounts | grep /var/log/mysql"
   end
   
-  %w(/etc/mysql /var/lib/mysql /var/log/mysql).each do |path|
+  %w(/vol/lib/mysql).each do |path|
     directory path do
       owner "mysql"
       group "mysql"
+    end
+  end
+  
+  %w(/vol/log/mysql).each do |path|
+    directory path do
+      owner "mysql"
+      group "adm"
     end
   end
   
