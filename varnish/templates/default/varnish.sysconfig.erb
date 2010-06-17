@@ -1,0 +1,49 @@
+# Configuration file for varnish
+#
+# /etc/init.d/varnish expects the variable $DAEMON_OPTS to be set from this
+# shell script fragment.
+#
+
+# Maximum number of open files (for ulimit -n)
+NFILES=<%= @node[:varnish][:nfiles] %>
+
+# Default varnish instance name is the local nodename.  Can be overridden with
+# the -n switch, to have more instances on a single server.
+INSTANCE=$(uname -n)
+
+VARNISH_VCL_CONF=<%= @node[:varnish][:vcl_conf] %>
+VARNISH_LISTEN_ADDRESS=<%= @node[:varnish][:listen_address] %>
+VARNISH_LISTEN_PORT=<%= @node[:varnish][:listen_port] %>
+
+VARNISH_ADMIN_LISTEN_ADDRESS=<%= @node[:varnish][:admin_listen_address] %>
+VARNISH_ADMIN_LISTEN_PORT=<%= @node[:varnish][:admin_listen_port] %>
+
+VARNISH_MIN_THREADS=<%= @node[:varnish][:min_threads] %>
+VARNISH_MAX_THREADS=<%= @node[:varnish][:max_threads] %>
+VARNISH_THREAD_TIMEOUT=<%= @node[:varnish][:thread_timeout] %>
+VARNISH_THREAD_POOLS=<%= @node[:varnish][:thread_pools] %>
+VARNISH_THREAD_POOL_ADD_DELAY=<%= @node[:varnish][:thread_pool_add_delay] %>
+
+VARNISH_STORAGE_TYPE=<%= @node[:varnish][:storage_type] %>
+VARNISH_STORAGE_FILE=<%= @node[:varnish][:storage_file] %>
+VARNISH_STORAGE_SIZE=<%= @node[:varnish][:storage_size] %>
+VARNISH_TTL=<%= @node[:varnish][:varnish_ttl] %>
+
+VARNISH_SESSION_WORKSPACE=<%= @node[:varnish][:session_workspace_size] %>
+
+<% if @node[:varnish][:storage_type] == 'malloc' %>
+VARNISH_STORAGE="<%=@node[:varnish][:storage_type]%>,<%=@node[:varnish][:storage_size]%>"
+<% elsif @node[:varnish][:storage_type] == 'file' %>
+VARNISH_STORAGE="<%=@node[:varnish][:storage_type]%>,<%=@node[:varnish][:storage_file]%>,<%=@node[:varnish][:storage_size]%>"
+<% end %>
+
+DAEMON_OPTS="-a ${VARNISH_LISTEN_ADDRESS}:${VARNISH_LISTEN_PORT}
+ -f ${VARNISH_VCL_CONF}
+ -T ${VARNISH_ADMIN_LISTEN_ADDRESS}:${VARNISH_ADMIN_LISTEN_PORT}
+ -t ${VARNISH_TTL}
+ -w${VARNISH_MIN_THREADS},${VARNISH_MAX_THREADS},${VARNISH_THREAD_TIMEOUT}
+ -u varnish -g varnish
+ -s ${VARNISH_STORAGE}
+ -p thread_pools=${VARNISH_THREAD_POOLS}
+ -p thread_pool_add_delay=${VARNISH_THREAD_POOL_ADD_DELAY}
+ -p sess_workspace=${VARNISH_SESSION_WORKSPACE}"
