@@ -168,7 +168,8 @@ template "#{node[:apache][:dir]}/sites-available/#{node[:apache][:name]}" do
       :server_name    => node[:apache][:server_name],
       :server_aliases => node[:apache][:server_aliases],
       :docroot        => node[:apache][:docroot],
-      :name           => node[:apache][:name]
+      :name           => node[:apache][:name],
+      :vhost_port     => node[:apache][:vhost_port]
     })
   notifies :restart, resources(:service => "apache2")
 end

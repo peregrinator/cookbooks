@@ -45,7 +45,7 @@ end
 ###
 
 # General settings
-set_unless[:apache][:listen_ports] = [ "80","443" ]
+set_unless[:apache][:listen_ports] = "80"#[ "80","443" ] Until Chef 0.9 arrays are merged here and not overwritten, see http://tickets.opscode.com/browse/CHEF-838
 set_unless[:apache][:contact] = "ops@example.com"
 set_unless[:apache][:timeout] = 300
 set_unless[:apache][:keepalive] = "On"
@@ -81,3 +81,4 @@ set_unless[:apache][:server_name] = ""
 set_unless[:apache][:server_aliases] = ""
 set_unless[:apache][:docroot] = "/var/www"
 set_unless[:apache][:name] = "site"
+set_unless[:apache][:vhost_port] = "80"
