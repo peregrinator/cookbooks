@@ -201,8 +201,9 @@ apache_site node[:apache][:name] do
   action :enable
 end
 
-apache_site "000-default" do
-  action :disable
+file "/etc/apache2/sites-enabled/000-default" do
+  action :delete
+  notifies :reload, resources(:service => "apache2")
 end
 
 if node[:ec2]

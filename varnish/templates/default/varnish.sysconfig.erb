@@ -45,5 +45,6 @@ DAEMON_OPTS="-a ${VARNISH_LISTEN_ADDRESS}:${VARNISH_LISTEN_PORT}
  -u varnish -g varnish
  -s ${VARNISH_STORAGE}
  -p thread_pools=${VARNISH_THREAD_POOLS}
- -p thread_pool_add_delay=${VARNISH_THREAD_POOL_ADD_DELAY}
- -p sess_workspace=${VARNISH_SESSION_WORKSPACE}"
+ -p thread_pool_add_delay=${VARNISH_THREAD_POOL_ADD_DELAY}"
+
+# -p sess_workspace=${VARNISH_SESSION_WORKSPACE}"
