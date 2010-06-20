@@ -197,6 +197,12 @@ node[:apache][:enable_mods].each do |mod|
   end
 end
 
+if node[:nginx][:varnish_proxy]
+  apache_module 'deflate' do
+    enable false
+  end
+end
+
 apache_site node[:apache][:name] do
   action :enable
 end

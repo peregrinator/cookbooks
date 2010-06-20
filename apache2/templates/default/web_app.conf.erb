@@ -33,9 +33,9 @@
   RewriteLogLevel 0
 
   # Canonical host, <%= @node[:apache][:server_name] %>
-  RewriteCond %{HTTP_HOST}   !^<%= @node[:apache][:server_name] %> [NC]
-  RewriteCond %{HTTP_HOST}   !^$
-  RewriteRule ^/(.*)$        http://<%= @node[:apache][:server_name] %>/$1 [L,R=301]
+  # RewriteCond %{HTTP_HOST}   !^<%= @node[:apache][:server_name] %> [NC]
+  # RewriteCond %{HTTP_HOST}   !^$
+  # RewriteRule ^/(.*)$        http://<%= @node[:apache][:server_name] %>/$1 [L,R=301]
 
   RewriteCond %{DOCUMENT_ROOT}/system/maintenance.html -f
   RewriteCond %{SCRIPT_FILENAME} !maintenance.html

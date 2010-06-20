@@ -14,10 +14,10 @@ set_unless[:varnish][:vcl_conf]       = '/etc/varnish/default.vcl'
 # on all configured IPv4 addresses on all interfaces
 # On ec2 the machine is connected via an elastic_ip and doesn't know it's ipaddress
 set_unless[:varnish][:listen_address] = '0.0.0.0'
-set_unless[:varnish][:listen_port]    = '80'
+set_unless[:varnish][:listen_port]    = '6081'
 
 # admin options
-set_unless[:varnish][:admin_listen_address] = '127.0.0.1'
+set_unless[:varnish][:admin_listen_address] = '0.0.0.0'
 set_unless[:varnish][:admin_listen_port]    = '6082'
 
 # where to proxy requests to
