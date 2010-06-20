@@ -1,5 +1,6 @@
-user <%= @node[:nginx][:user] %>;
+# user <%= @node[:nginx][:user] %>;
 worker_processes  <%= @node[:nginx][:worker_processes] %>;
+
 <% if @node[:nginx][:daemon_disable] -%>
 daemon off;
 <% end -%>
@@ -30,11 +31,35 @@ http {
   gzip_http_version <%= @node[:nginx][:gzip_http_version] %>;
   gzip_comp_level <%= @node[:nginx][:gzip_comp_level] %>;
   gzip_proxied <%= @node[:nginx][:gzip_proxied] %>;
+  gzip_buffers <%= @node[:nginx][:gzip_buffers] %>;
+  gzip_min_length <%= @node[:nginx][:gzip_min_length] %>;
   gzip_types <%= @node[:nginx][:gzip_types].join(' ') %>;
+  gzip_disable  msie6;
   <% end %>
 
   server_names_hash_bucket_size <%= @node[:nginx][:server_names_hash_bucket_size] %>;
+  
+  <% if @node[:nginx][:varnish_proxy] %>
+  upstream varnish {
+    server <%= @node[:nginx][:varnish_proxy_host] %>:<%= @node[:varnish][:listen_port] %> weight=<%= @node[:nginx][:varnish_weight] %> max_fails=<%= @node[:nginx][:varnish_max_fails] %> fail_timeout=<%= @node[:nginx][:varnish_fail_timeout] %>;
+  }
+  <% end %>
+  
+  server {
+    listen                    <%= @node[:nginx][:listen_host] %>:<%= @node[:nginx][:listen_port] %>;
+
+    location / {
+      proxy_pass             http://varnish;
+      proxy_redirect         off;
+      proxy_set_header       Host $host;
+      proxy_set_header       X-Real-IP $remote_addr;
+      proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header       X-Client-Verify SUCCESS;
+      proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
+      proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+    }
+  }
 
   include <%= @node[:nginx][:dir] %>/conf.d/*.conf;
-  include <%= @node[:nginx][:dir] %>/sites-enabled/*;
+  #include <%= @node[:nginx][:dir] %>/sites-enabled/*;
 }

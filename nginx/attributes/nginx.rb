@@ -1,4 +1,4 @@
-set_unless[:nginx][:version]      = "0.7.64"
+set_unless[:nginx][:version]      = "0.7.62"
 set_unless[:nginx][:install_path] = "/opt/nginx-#{nginx[:version]}"
 set_unless[:nginx][:src_binary]   = "#{nginx[:install_path]}/sbin/nginx"
 
@@ -22,10 +22,15 @@ set_unless[:nginx][:configure_flags] = [
   "--with-http_gzip_static_module"
 ]
 
+set_unless[:nginx][:listen_host] = '0.0.0.0'
+set_unless[:nginx][:listen_port] = '80'
+
 set_unless[:nginx][:gzip] = "on"
 set_unless[:nginx][:gzip_http_version] = "1.0"
 set_unless[:nginx][:gzip_comp_level] = "2"
 set_unless[:nginx][:gzip_proxied] = "any"
+set_unless[:nginx][:gzip_buffers] = '16 8k'
+set_unless[:nginx][:gzip_min_length] = 500
 set_unless[:nginx][:gzip_types] = [
   "text/plain",
   "text/html",
@@ -42,3 +47,9 @@ set_unless[:nginx][:keepalive_timeout]  = 65
 set_unless[:nginx][:worker_processes]   = cpu[:total]
 set_unless[:nginx][:worker_connections] = 2048
 set_unless[:nginx][:server_names_hash_bucket_size] = 64
+
+set_unless[:nginx][:varnish_proxy] = false
+set_unless[:nginx][:varnish_proxy_host] = '127.0.0.1'
+set_unless[:nginx][:varnish_weight] = 10
+set_unless[:nginx][:varnish_max_fails] = 3
+set_unless[:nginx][:varnish_fail_timeout] = '15s'
