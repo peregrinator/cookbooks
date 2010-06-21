@@ -46,11 +46,11 @@ http {
   <% end %>
   
   server {
-    listen                    <%= @node[:nginx][:listen_host] %>:<%= @node[:nginx][:listen_port] %>;
+    listen                   <%= @node[:nginx][:listen_port] %> default;
 
     location / {
       proxy_pass             http://varnish;
-      proxy_redirect         off;
+      proxy_redirect         http://varnish/ http://$host:$server_port/;
       proxy_set_header       Host $host;
       proxy_set_header       X-Real-IP $remote_addr;
       proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;

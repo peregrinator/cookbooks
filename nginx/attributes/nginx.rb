@@ -22,7 +22,7 @@ set_unless[:nginx][:configure_flags] = [
   "--with-http_gzip_static_module"
 ]
 
-set_unless[:nginx][:listen_host] = '0.0.0.0'
+set_unless[:nginx][:listen_host] = '127.0.0.1'
 set_unless[:nginx][:listen_port] = '80'
 
 set_unless[:nginx][:gzip] = "on"
@@ -30,7 +30,7 @@ set_unless[:nginx][:gzip_http_version] = "1.0"
 set_unless[:nginx][:gzip_comp_level] = "2"
 set_unless[:nginx][:gzip_proxied] = "any"
 set_unless[:nginx][:gzip_buffers] = '16 8k'
-set_unless[:nginx][:gzip_min_length] = 500
+set_unless[:nginx][:gzip_min_length] = 0
 set_unless[:nginx][:gzip_types] = [
   "text/plain",
   "text/html",
