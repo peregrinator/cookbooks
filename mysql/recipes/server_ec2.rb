@@ -18,7 +18,7 @@
 #
 
 
-if node[:ec2]
+if node[:ec2] && ( node[:chef][:roles].include?('staging') || node[:chef][:roles].include?('database') )
   service "mysql" do
     action :stop
   end

@@ -30,10 +30,20 @@
   end
 end
 
-template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
-  variables :password => node[:mysql][:server_root_password]
-  source "database.yml.erb"
-  mode 0644
+if node[:chef][:roles].include?('staging')
+  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
+    variables :password => node[:mysql][:server_root_password]
+    source "staging.database.yml.erb"
+    mode 0644
+  end
+elsif node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
+  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
+    variables :host => node[:mysql][:server_address], 
+              :port => node[:mysql][:server_port],
+              :password => node[:mysql][:server_root_password]
+    source "app_server.database.yml.erb"
+    mode 0644
+  end
 end
 
 gem_package "bundler" do
