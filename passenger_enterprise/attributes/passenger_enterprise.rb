@@ -23,10 +23,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-set_unless[:passenger_enterprise][:version]     = "2.2.11"
-set_unless[:passenger_enterprise][:root_path]   = "/opt/ruby-enterprise/lib/ruby/gems/1.8/gems/passenger-#{passenger_enterprise[:version]}"
-set_unless[:passenger_enterprise][:module_path] = "#{passenger_enterprise[:root_path]}/ext/apache2/mod_passenger.so"
+default[:passenger_enterprise][:version]     = "2.2.11"
+default[:passenger_enterprise][:root_path]   = "/opt/ruby-enterprise/lib/ruby/gems/1.8/gems/passenger-#{passenger_enterprise[:version]}"
+default[:passenger_enterprise][:module_path] = "#{passenger_enterprise[:root_path]}/ext/apache2/mod_passenger.so"
 
-set_unless[:passenger_enterprise][:pool_idle_time] = 500
-set_unless[:passenger_enterprise][:max_requests]   = 500 #TODO - this is prob too few?
-set_unless[:passenger_enterprise][:max_pool_size]  = 10
+default[:passenger_enterprise][:pool_idle_time] = 500
+default[:passenger_enterprise][:max_requests]   = 500 #TODO - this is prob too few?
+default[:passenger_enterprise][:max_pool_size]  = 10
