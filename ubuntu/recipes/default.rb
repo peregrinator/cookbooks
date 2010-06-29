@@ -141,7 +141,7 @@ directory "/home/deploy/.ssh" do
   not_if do File.directory?("/home/deploy/.ssh") end
 end
 
-%w(authorized_keys known_hosts id_rsa).each do |file|
+%w(known_hosts).each do |file|
   remote_file "/home/deploy/.ssh/#{file}" do
     source "users/deploy/#{file}"
     owner 'deploy'
@@ -150,6 +150,26 @@ end
     action :create
     not_if do File.exists?("/home/deploy/.ssh/#{file}") end
   end
+end
+
+template "/home/deploy/.ssh/authorized_keys" do
+  source "users/authorized_keys.erb"
+  owner 'deploy'
+  group 'deploy'
+  variables :private_key => node[:ubuntu][:users][:deploy][:authorized_keys]
+  mode 0600
+  action :create
+  not_if do File.exists?("/home/deploy/.ssh/authorized_keys") end
+end
+
+template "/home/deploy/.ssh/id_rsa" do
+  source "users/id_rsa.erb"
+  owner 'deploy'
+  group 'deploy'
+  variables :private_key => node[:ubuntu][:users][:deploy][:private_key]
+  mode 0600
+  action :create
+  not_if do File.exists?("/home/deploy/.ssh/#{file}") end
 end
 
 # add deploy to sudoers without password required
