@@ -1,9 +1,27 @@
-backend default {
-  .host = "<%= @node[:varnish][:proxy_host] %>";
-  .port = "<%= @node[:varnish][:proxy_port] %>";
+backend app_server {
+  .host = "<%= @node[:varnish][:app_proxy_host] %>";
+  .port = "<%= @node[:varnish][:app_proxy_port] %>";
+}
+
+backend static_server {
+  .host = "<%= @node[:varnish][:static_proxy_host] %>";
+  .port = "<%= @node[:varnish][:static_proxy_port] %>";
 }
 
 sub vcl_recv {
+    # set the backend server based on request (if multi-server stack)
+  <% if @node[:chef][:roles].include?('staging') %>
+    set req.backend = app_server;
+  <% elsif @node[:chef][:roles].include?('proxy') %>
+    if (req.url ~ "^/images" || req.url ~ "^/javascripts" || req.url ~ "^/flash" || req.url ~ "^/stylesheets" || req.url ~ "^/sitemaps") {
+      set req.backend = static_server;
+      return (lookup);
+    } else {
+      set req.backend = app_server;
+    }
+  <% end %>
+    
+  
     /* Reject Non-RFC2616 or CONNECT or TRACE requests. */
     if (req.request != "GET" &&
       req.request != "HEAD" &&
@@ -34,7 +52,7 @@ sub vcl_recv {
     }
       
     /* Prevent duplication of caches */
-    set req.http.host = "<%= @node[:varnish][:proxy_host] %>";
+    set req.http.host = "<%= @node[:varnish][:proxy_host_name] %>";
     
     /* Check to see if cached */
     return (lookup);
