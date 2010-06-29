@@ -1,7 +1,9 @@
 production:
   adapter: mysql
-  host: localhost
+  host: <%= @host %>
+  port: <%= @port %>
   database: fr2_production
   encoding: utf8
+  reconnect: true
   username: root
   password: <%= @password %>
