@@ -211,8 +211,12 @@ file "/etc/apache2/sites-enabled/000-default" do
   action :delete
   notifies :reload, resources(:service => "apache2")
 end
+file "/etc/apache2/sites-enabled/site" do
+  action :delete
+  notifies :reload, resources(:service => "apache2")
+end
 
-if node[:ec2]
+if node[:ec2] && node[:chef][:roles].include?('staging')
   mount "/var/log/apache2" do
     device "/vol/log/apache2"
     fstype "none"
