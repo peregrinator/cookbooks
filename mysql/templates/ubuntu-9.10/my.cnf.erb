@@ -21,7 +21,7 @@
 # escpecially if they contain "#" chars...
 # Remember to edit /etc/mysql/debian.cnf when changing the socket location.
 [client]
-port            = 3306
+port            = <%= @node[:mysql][:server_port] %>
 socket          = /var/run/mysqld/mysqld.sock
 
 # Here is entries for some specific programs
@@ -46,7 +46,7 @@ nice            = 0
 user            = mysql
 pid-file        = /var/run/mysqld/mysqld.pid
 socket          = /var/run/mysqld/mysqld.sock
-port            = 3306
+port            = <%= @node[:mysql][:server_port] %>
 basedir         = /usr
 datadir         = <%= @node[:mysql][:datadir] %>
 tmpdir          = /tmp
