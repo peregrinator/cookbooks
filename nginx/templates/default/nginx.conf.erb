@@ -47,8 +47,9 @@ http {
   
   server {
     listen                   <%= @node[:nginx][:listen_port] %> default;
-
+    
     location / {
+      <% if @node[:nginx][:varnish_proxy] %>
       proxy_pass             http://varnish;
       proxy_redirect         http://varnish/ http://$host:$server_port/;
       proxy_set_header       Host $host;
@@ -57,7 +58,18 @@ http {
       proxy_set_header       X-Client-Verify SUCCESS;
       proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
       proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+      <% elsif @node[:chef][:roles].include?('static') %>
+      # doc root
+      root <%= @node[:nginx][:doc_root] %>;
+      
+      # If the file exists as a static file serve it directly without
+      # running all the other rewite tests on it
+      if (-f $request_filename) { 
+        break; 
+      }
+      <% end %>
     }
+    
   }
 
   include <%= @node[:nginx][:dir] %>/conf.d/*.conf;
