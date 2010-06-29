@@ -48,10 +48,36 @@ bash "Install Ruby Enterprise Edition" do
   end
 end
 
-binaries = %w(erb gem irb passenger-config passenger-install-apache2-module passenger-install-nginx-module passenger-make-enterprisey passenger-memory-stats passenger-spawn-server passenger-status passenger-stress-test rackup rake rdoc ree-version ri ruby testrb)
+binaries = %w(erb gem gem1.8 irb passenger-config passenger-install-apache2-module passenger-install-nginx-module passenger-make-enterprisey passenger-memory-stats passenger-spawn-server passenger-status passenger-stress-test rackup rake rdoc ree-version ri ruby testrb)
 binaries.each do |binary|
   link "/usr/bin/#{binary}" do
     to "#{node[:ruby_enterprise][:install_path]}/bin/#{binary}"
   end
-  
+end
+
+# the package chef uses for ruby causes trouble after the fact, so... bye bye
+# if we uninstall the package it will get re-added on next run.
+directory "/usr/lib/ruby" do
+  recursive true
+  action :delete
+end
+
+link "/usr/bin" do
+  to "#{node[:ruby_enterprise][:install_path]}/bin/ruby"
+end
+link "/usr/bin/ruby1.8" do
+  to "#{node[:ruby_enterprise][:install_path]}/bin/ruby"
+end
+
+execute "set global path" do
+  command 'echo \'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/ruby-enterprise/bin"\' | tee /etc/environment'
+end
+
+execute "echo gem path" do
+  command 'echo `gem environment` | tee /tmp/foo'
+end
+
+gem_package "chef" do
+  version node[:bootstrap][:chef][:client_version]
+  not_if "gem list chef | grep chef" # gem list doesn't return 1 on error so we use grep too
 end
