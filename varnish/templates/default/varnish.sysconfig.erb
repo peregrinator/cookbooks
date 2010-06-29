@@ -29,7 +29,7 @@ VARNISH_STORAGE_FILE=<%= @node[:varnish][:storage_file] %>
 VARNISH_STORAGE_SIZE=<%= @node[:varnish][:storage_size] %>
 VARNISH_TTL=<%= @node[:varnish][:varnish_ttl] %>
 
-VARNISH_SESSION_WORKSPACE=<%= @node[:varnish][:session_workspace_size] %>
+# VARNISH_SESSION_WORKSPACE=<%= @node[:varnish][:session_workspace_size] %>
 
 <% if @node[:varnish][:storage_type] == 'malloc' %>
 VARNISH_STORAGE="<%=@node[:varnish][:storage_type]%>,<%=@node[:varnish][:storage_size]%>"
