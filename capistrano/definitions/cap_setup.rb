@@ -40,7 +40,7 @@ define :cap_setup, :path => nil, :owner => "root", :group => "root", :appowner =
     end
   end
   
-  if node[:ec2]
+  if node[:ec2] && node[:chef][:roles].include?('staging')
     mount "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared" do
       device "/vol/apps/#{node[:apache][:name]}/shared"
       fstype "none"

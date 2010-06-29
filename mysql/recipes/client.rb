@@ -35,16 +35,18 @@ package "mysql-client" do
   action :install
 end
 
-case node[:platform]
-when "centos","redhat", "suse"
-  package "ruby-mysql" do
-    action :install
-  end
+if node[:chef][:roles].include?('staging') || node[:chef][:roles].include?('app')
+  case node[:platform]
+  when "centos","redhat", "suse"
+    package "ruby-mysql" do
+      action :install
+    end
 
-else
-  r = gem_package "mysql" do
-    action :nothing
-  end
+  else
+    r = gem_package "mysql" do
+      action :nothing
+    end
 
-  r.run_action(:install)
+    r.run_action(:install)
+  end
 end
