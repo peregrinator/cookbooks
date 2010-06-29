@@ -60,6 +60,10 @@ end
 #
 ####################################
 
+# varnish
+package "libpcre3-dev" do
+  action :install
+end
 # nokogiri and calais gems
 package "libxml2-dev" do
   action :install
