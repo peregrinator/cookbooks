@@ -60,7 +60,7 @@ sub vcl_recv {
 
 sub vcl_fetch {
     /* Directly serve static content */
-    if (req.url ~ "^/images" || req.url ~ "^/javascripts" || req.url ~ "^/flash" || req.url ~ "^/stylesheets" || req.url ~ "^/sitemaps") {
+    if (req.url ~ "^/images" || req.url ~ "^/javascripts" || req.url ~ "^/flash" || req.url ~ "^/stylesheets" || req.url ~ "^/sitemaps" || req.url ~ "^/articles/html" || req.url ~ "^/articles/xml") {
         return(deliver);
     }
     /* ESI process the rest */
