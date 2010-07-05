@@ -32,18 +32,48 @@ end
 
 if node[:chef][:roles].include?('staging')
   template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
-    variables :password => node[:mysql][:server_root_password]
+    variables :password      => node[:mysql][:server_root_password],
+              :database_name => node[:mysql][:database_name]
     source "staging.database.yml.erb"
     mode 0644
   end
 elsif node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
   template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
-    variables :host => node[:mysql][:server_address], 
-              :port => node[:mysql][:server_port],
-              :password => node[:mysql][:server_root_password]
+    variables :host          => node[:mysql][:server_address], 
+              :port          => node[:mysql][:server_port],
+              :database_name => node[:mysql][:database_name],
+              :password      => node[:mysql][:server_root_password]
     source "app_server.database.yml.erb"
     mode 0644
   end
+end
+
+template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/sphinx.yml" do
+  variables :server_address => node[:sphinx][:server_address],
+            :server_port    => node[:sphinx][:server_port],
+            :memory_limit   => node[:sphinx][:memory_limit],
+            :version        => node[:sphinx][:version]
+  source "sphinx.yml.erb"
+  mode 0644
+end
+
+execute "Get private config file amazon.yml" do
+  cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
+  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:amazon.yml amazon.yml"
+  user "#{node[:capistrano][:deploy_user]}"
+  group "#{node[:capistrano][:deploy_user]}"
+end
+execute "Get private config file api_keys.yml" do
+  cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
+  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:api_keys.yml api_keys.yml"
+  user "#{node[:capistrano][:deploy_user]}"
+  group "#{node[:capistrano][:deploy_user]}"
+end
+execute "Get private config file cloudkicker_config.rb" do
+  cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
+  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:cloudkicker_config.rb cloudkicker_config.rb"
+  user "#{node[:capistrano][:deploy_user]}"
+  group "#{node[:capistrano][:deploy_user]}"
 end
 
 gem_package "bundler" do
