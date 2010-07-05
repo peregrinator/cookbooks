@@ -32,3 +32,7 @@ mount "/vol" do
   # Do not execute if its already mounted (ubunutu/linux only)
   not_if "cat /proc/mounts | grep /vol"
 end
+
+package 'ec2-api-tools' do
+  action :install
+end
