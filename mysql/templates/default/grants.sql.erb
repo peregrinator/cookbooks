@@ -13,3 +13,6 @@ SET PASSWORD FOR 'root'@'localhost' = PASSWORD('<%= @node[:mysql][:server_root_p
 
 # Use these now! (reloads the privileges from the grant table)
 FLUSH PRIVILEGES;
+
+# Grant remote access for root user.
+GRANT ALL ON *.* TO 'root' IDENTIFIED BY '<%= @node[:mysql][:server_root_password] %>';
