@@ -31,8 +31,11 @@
 end
 
 directory "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/current/public/articles" do
+  owner "#{node[:capistrano][:deploy_user]}"
+  group "#{node[:capistrano][:deploy_user]}"
   mode 0755
   action :create
+  recursive true
 end
 
 if node[:chef][:roles].include?('staging')
