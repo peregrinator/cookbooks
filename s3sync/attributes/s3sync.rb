@@ -1,8 +1,10 @@
 #
-# Cookbook Name:: ec2
-# Recipe:: default
+# Cookbook Name:: s3sync
+# Attributes:: s3sync
 #
-# Copyright 2008-2009, Opscode, Inc.
+# Copyright:: 2010, Critical Juncture
+#
+# Author:: Bob Burbach, Github: Peregrinator
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,23 +18,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-directory "/vol" do
-  owner "ubuntu"
-  group "ubuntu"
-  mode "0755"
-  action :create
-  not_if "test -d /vol"
-end
-
-mount "/vol" do
-  device "/dev/sdh"
-  fstype "xfs"
-  options "rw noatime"
-  action [:enable, :mount]
-  # Do not execute if its already mounted (ubunutu/linux only)
-  not_if "cat /proc/mounts | grep /vol"
-end
-
-package 'ec2-api-tools' do
-  action :install
-end
+default[:s3sync][:filename]     = 's3sync.tar.gz'
+default[:s3sync][:url]          = "http://s3.amazonaws.com/ServEdge_pub/s3sync/#{s3sync[:filename]}"
+default[:s3sync][:install_path] = '/usr/local'
+default[:s3sync][:ssl_cert_dir] = '/etc/s3conf/certs'

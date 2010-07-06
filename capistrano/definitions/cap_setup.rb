@@ -30,7 +30,7 @@ define :cap_setup, :path => nil, :owner => "root", :group => "root", :appowner =
   end
   
   # after chef-174 fixed, change mode to 2775
-  %w{ releases shared }.each do |dir|
+  %w{ shared }.each do |dir|
     directory "#{params[:path]}/#{dir}" do
       owner params[:owner]
       group params[:group]
@@ -59,7 +59,7 @@ define :cap_setup, :path => nil, :owner => "root", :group => "root", :appowner =
   end
   
   # create directories in shared
-  %w{ log config system data tmp db/sphinx/production }.each do |dir|
+  %w{ log config/initializers system data tmp db/sphinx/production }.each do |dir|
     directory "#{params[:path]}/shared/#{dir}" do
       owner params[:appowner]
       group params[:group]

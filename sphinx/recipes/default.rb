@@ -47,7 +47,7 @@ if node[:sphinx][:libstemmer]
     not_if "test -f /usr/local/bin/searchd"
     code <<-EOH
       tar -xvf #{node[:sphinx][:tar_file]}
-      cd  #{node[:sphinx][:version]}
+      cd  sphinx-#{node[:sphinx][:version]}
       tar -xvf ../libstemmer_c.tgz
       ./configure #{node[:sphinx][:configure_options]}
       make
@@ -62,7 +62,7 @@ else
     not_if "test -f /usr/local/bin/searchd"
     code <<-EOH
       tar -xvf #{node[:sphinx][:tar_file]}
-      cd  #{node[:sphinx][:version]}
+      cd  sphinx-#{node[:sphinx][:version]}
       ./configure #{node[:sphinx][:configure_options]}
       make
       make install
