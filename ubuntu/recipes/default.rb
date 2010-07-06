@@ -224,3 +224,29 @@ template "/etc/cron.d/fr2_data" do
   source "cron/fr2_data.erb"
   mode 0644
 end
+
+####################################
+#
+# ETC HOSTS SETUP
+#
+####################################
+
+template "/etc/hosts" do
+  variables :proxy_server_ip     => node[:ubuntu][:proxy_server][:ip],
+            :proxy_server_fqdn   => node[:ubuntu][:proxy_server][:fqdn],
+            :proxy_server_alias  => node[:ubuntu][:proxy_server][:alias],
+            :static_server_ip    => node[:ubuntu][:static_server][:ip],
+            :static_server_fqdn  => node[:ubuntu][:static_server][:fqdn],
+            :static_server_alias => node[:ubuntu][:static_server][:alias],
+            :worker_server_ip    => node[:ubuntu][:worker_server][:ip],
+            :worker_server_fqdn  => node[:ubuntu][:worker_server][:fqdn],
+            :worker_server_alias => node[:ubuntu][:worker_server][:alias],
+            :database_ip         => node[:ubuntu][:database][:ip],
+            :database_fqdn       => node[:ubuntu][:database][:fqdn],
+            :database_alias      => node[:ubuntu][:database][:alias],
+            :sphinx_ip           => node[:ubuntu][:sphinx][:ip],
+            :sphinx_fqdn         => node[:ubuntu][:sphinx][:fqdn],
+            :sphinx_alias        => node[:ubuntu][:sphinx][:alias]
+  source "etc_hosts.erb"
+  mode 0644
+end
