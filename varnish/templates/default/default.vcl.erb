@@ -13,7 +13,7 @@ sub vcl_recv {
   <% if @node[:chef][:roles].include?('staging') %>
     set req.backend = app_server;
   <% elsif @node[:chef][:roles].include?('proxy') %>
-    if (req.url ~ "^/images" || req.url ~ "^/javascripts" || req.url ~ "^/flash" || req.url ~ "^/stylesheets" || req.url ~ "^/sitemaps") {
+    if (req.url ~ "^/images" || req.url ~ "^/javascripts" || req.url ~ "^/flash" || req.url ~ "^/stylesheets" || req.url ~ "^/sitemaps"  || req.url ~ "^/articles/html" || req.url ~ "^/articles/xml") {
       set req.backend = static_server;
       return (lookup);
     } else {
