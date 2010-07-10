@@ -9,9 +9,8 @@ backend static_server {
 }
 
 sub vcl_recv {
-  
-    /* serve slightly stale content while a fresh version is fetched
-       better user experience and no thread pile up on the app servers */
+    # serve slightly stale content while a fresh version is fetched
+    #   better user experience and no thread pile up on the app servers
     set req.grace = 2m;
   
     # set the backend server based on request (if multi-server stack)
@@ -27,7 +26,7 @@ sub vcl_recv {
   <% end %>
     
   
-    /* Reject Non-RFC2616 or CONNECT or TRACE requests. */
+    # Reject Non-RFC2616 or CONNECT or TRACE requests.
     if (req.request != "GET" &&
       req.request != "HEAD" &&
       req.request != "PUT" &&
@@ -37,53 +36,54 @@ sub vcl_recv {
         return (pipe);
     }
     
-    /* Compression handled upstream; only want one in the cache */
+    # Compression handled upstream; only want one in the cache
     if (req.http.Accept-Encoding) {
         remove req.http.Accept-Encoding;
     }
     
-    /* Add a unique header containing the client address */
+    # Add a unique header containing the client address
     remove req.http.X-Forwarded-For;
     set    req.http.X-Forwarded-For = client.ip;
     
-    /* Pass POSTs etc directly on to the backend */
+    # Pass POSTs etc directly on to the backend
     if (req.request != "GET" && req.request != "HEAD") {
         return (pass);
     }
     
-    /* Pass admin requests directly on to the backend */
+    # Pass admin requests directly on to the backend
     if (req.url ~ "^/admin/") {
         return (pass);
     }
 
-    /* Remove cookies for anything that doesn't match the following
+    # Remove cookies for anything that doesn't match the following
     if (req.url !~ "^(/login|/logout|/admin)") {
       unset req.http.cookie;
     }
 
-    /* Prevent duplication of caches */
+    # Prevent duplication of caches
     set req.http.host = "<%= @node[:varnish][:proxy_host_name] %>";
     
-    /* Check to see if cached */
+    # Check to see if cached
     return (lookup);
 }
 
 sub vcl_fetch {
-    /* Remove cookies for anything that doesn't match the following
-    if (req.url !~ "^(/login|/logout|/admin)") {
-      unset obj.http.set-cookie;
-    }
+    # The following two sections give 'not accessible' errors...commenting out for now...
     
-    /* serve slightly stale content while a fresh version is fetched
-       better user experience and no thread pile up on the app servers */
-    set obj.grace = 2m;
+    # Remove cookies for anything that doesn't match the following
+    # if (req.url !~ "^(/login|/logout|/admin)") {
+    #   unset obj.http.set-cookie;
+    # }
     
-  
-    /* Directly serve static content */
+    # serve slightly stale content while a fresh version is fetched
+    #    better user experience and no thread pile up on the app servers
+    # set obj.grace = 2m;
+    
+    # Directly serve static content
     if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemaps|/articles/html|/articles/xml|/regulations/html)") {
         return(deliver);
     }
-    /* ESI process the rest */
+    # ESI process the rest
     else {
         esi;
     }
