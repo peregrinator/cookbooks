@@ -68,6 +68,11 @@ sub vcl_recv {
 }
 
 sub vcl_fetch {
+    # Remove cache headers from going out to client; cache headers are being used for
+    #   varnish, not browser/upstream caches.  Eventually should replace this with a 
+    #   rule that sets everything to a 5 minute cache.
+    unset beresp.http.Cache-Control;
+    
     # The following two sections give 'not accessible' errors...commenting out for now...
     
     # Remove cookies for anything that doesn't match the following
