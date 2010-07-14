@@ -9,3 +9,5 @@ PassengerPoolIdleTime <%= @node[:passenger_enterprise][:pool_idle_time] %>
 PassengerMaxRequests <%= @node[:passenger_enterprise][:max_requests] %>
 # On a 256MB slice running MySQL the recommended setting is 2
 PassengerMaxPoolSize <%= @node[:passenger_enterprise][:max_pool_size] %>
+# Turn on/off global cueing
+PassengerUseGlobalQueue <%= @node[:passenger_enterprise][:global_cue] %>
