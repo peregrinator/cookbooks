@@ -10,6 +10,8 @@ pid        /var/run/nginx.pid;
 
 events {
   worker_connections  <%= @node[:nginx][:worker_connections] %>;
+  # more efficient on linux
+  use epoll;
 }
 
 http {
