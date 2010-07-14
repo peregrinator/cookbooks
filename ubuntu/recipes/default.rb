@@ -220,6 +220,30 @@ if node[:ec2]
     source "cron/ebs_backup.erb"
     mode 0644
   end
+  
+  execute "Get Amazon private key" do
+    cwd "/mnt"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:private_key.pem private_key.pem"
+  end
+  
+  execute "Get Amazon x509 cert" do
+    cwd "/mnt"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:cert.pem cert.pem"
+  end
+
+  execute "add private key environment variable" do
+    command "echo export EC2_PRIVATE_KEY='/mnt/private_key.pem' | tee -a /etc/profile"
+    not_if do
+      system("cat /etc/profile | grep -q 'export EC2_PRIVATE_KEY'")
+    end
+  end
+  
+  execute "add cert to environment variable" do
+    command "echo export EC2_CERT='/mnt/cert.pem' | tee -a /etc/profile"
+    not_if do
+      system("cat /etc/profile | grep -q 'export EC2_CERT'")
+    end
+  end
 end
 
 if node[:chef][:roles].include?('worker') || node[:chef][:roles].include?('staging')
