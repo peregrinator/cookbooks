@@ -51,6 +51,8 @@ http {
     listen                   <%= @node[:nginx][:listen_port] %> default;
     
     location / {
+      client_max_body_size = <%= @node[:nginx][:client_max_body_size] %>;
+      
       <% if @node[:nginx][:varnish_proxy] %>
       auth_basic            "Restricted";
       auth_basic_user_file  auth/htpasswd;

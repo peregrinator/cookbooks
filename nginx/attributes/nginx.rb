@@ -22,6 +22,8 @@ default[:nginx][:configure_flags] = [
   "--with-http_gzip_static_module"
 ]
 
+default[:nginx][:client_max_body_size] = '5M'
+
 default[:nginx][:listen_host] = '127.0.0.1'
 default[:nginx][:listen_port] = '80'
 
