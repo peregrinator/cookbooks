@@ -210,7 +210,8 @@ if node[:ec2]
               :mysql_user    => 'root', 
               :mysql_passwd  => node[:mysql][:server_root_password],
               :description   => node[:apache][:name],
-              :log           => "/mnt/backup.log"
+              :log           => node[:ubuntu][:backup_log_dir],
+              :roles         => node[:chef][:roles]
     source "cron/ebs_backup.erb"
     mode 0644
   end
