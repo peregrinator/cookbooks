@@ -50,6 +50,8 @@ http {
     
     location / {
       <% if @node[:nginx][:varnish_proxy] %>
+      auth_basic            "Restricted";
+      auth_basic_user_file  auth/htpasswd;
       proxy_pass             http://varnish;
       proxy_redirect         http://varnish/ http://$host:$server_port/;
       proxy_set_header       Host $host;
