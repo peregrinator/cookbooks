@@ -23,6 +23,7 @@ default[:varnish][:admin_listen_port]    = '6082'
 # where to proxy requests to 
 default[:varnish][:app_proxy_host] = '127.0.0.1'
 default[:varnish][:app_proxy_port] = '8080'
+default[:varnish][:app_proxy_host_probe_url] = '/status'
 default[:varnish][:static_proxy_host] = '127.0.0.1'
 default[:varnish][:static_proxy_port] = '8080'
 

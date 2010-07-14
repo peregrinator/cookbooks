@@ -1,11 +1,27 @@
-backend app_server {
-  .host = "<%= @node[:varnish][:app_proxy_host] %>";
-  .port = "<%= @node[:varnish][:app_proxy_port] %>";
-}
+<% @node[:varnish][:app_proxy_host].each_with_index do |host, i| %>
+  backend app_server_<%= i+1 %> {
+    .host = "<%= host %>";
+    .port = "<%= @node[:varnish][:app_proxy_port] %>";
+    .probe = {
+               .url = "<%= @node[:varnish][:app_proxy_host_probe_url] %>";
+               .interval = 5s;
+               .timeout = 1 s;
+               .window = 5;
+               .threshold = 3;
+    }
+  }
+<% end %>
+
 
 backend static_server {
   .host = "<%= @node[:varnish][:static_proxy_host] %>";
   .port = "<%= @node[:varnish][:static_proxy_port] %>";
+}
+
+director app_director round-robin {
+  <% @node[:varnish][:app_proxy_host].each_with_index do |host, i| %>
+    { .backend = app_server_<%= i+1 %>; }
+  <% end %>
 }
 
 sub vcl_recv {
@@ -15,13 +31,13 @@ sub vcl_recv {
   
     # set the backend server based on request (if multi-server stack)
   <% if @node[:chef][:roles].include?('staging') %>
-    set req.backend = app_server;
+    set req.backend = app_server_1;
   <% elsif @node[:chef][:roles].include?('proxy') %>
     if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemaps|/articles/html|/articles/xml|/regulations/html)") {
       set req.backend = static_server;
       return (lookup);
     } else {
-      set req.backend = app_server;
+      set req.backend = app_director;
     }
   <% end %>
     
