@@ -54,6 +54,7 @@ http {
       <% if @node[:nginx][:varnish_proxy] %>
       auth_basic            "Restricted";
       auth_basic_user_file  auth/htpasswd;
+
       proxy_pass             http://varnish;
       proxy_redirect         http://varnish/ http://$host:$server_port/;
       proxy_set_header       Host $host;
@@ -71,9 +72,19 @@ http {
       if (-f $request_filename) { 
         break; 
       }
-      <% end %>
+      <% end %>      
     }
     
+    <% if @node[:chef][:roles].include?('static') %>
+      error_page 500  /500_static.html;  
+      location = /500_static.html {  
+          root  <%= @node[:nginx][:doc_root] %>;  
+      }
+      error_page 404  /404_static.html;  
+      location = /404_static.html {  
+          root  <%= @node[:nginx][:doc_root] %>;  
+      }
+    <% end %>
   }
 
   include <%= @node[:nginx][:dir] %>/conf.d/*.conf;
