@@ -82,6 +82,11 @@ package "xpdf" do
   action :install
 end
 
+# used by apache and ngix for creating passwords for basic auth
+package "apache2-utils" do
+  action :install
+end
+
 ####################################
 #
 # GROUP SETUP
