@@ -35,6 +35,11 @@ end
   end
 end
 
+directory "#{node[:nginx][:host_name]}" do
+  action :create
+  recursive true
+end
+
 template "nginx.conf" do
   path "#{node[:nginx][:dir]}/nginx.conf"
   source "nginx.conf.erb"
