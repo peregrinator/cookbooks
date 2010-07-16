@@ -48,10 +48,20 @@ http {
   <% end %>
   
   server {
-    listen                   <%= @node[:nginx][:listen_port] %> default;
+    listen <%= @node[:nginx][:listen_port] %>;
+    server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
+    
+    access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/access.log;
+    error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/error.log;
+
+    <% if @node[:nginx][:varnish_proxy] %>
+    location /admin {
+      rewrite  ^/(admin($|/.*))  https://<%= @node[:nginx][:host_name] %>/$1  permanent;
+    }
+    <% end %>
     
     location / {
-      client_max_body_size = <%= @node[:nginx][:client_max_body_size] %>;
+      client_max_body_size <%= @node[:nginx][:client_max_body_size] %>;
       
       <% if @node[:nginx][:varnish_proxy] %>
       auth_basic            "Restricted";
@@ -70,7 +80,7 @@ http {
       root <%= @node[:nginx][:doc_root] %>;
       
       # If the file exists as a static file serve it directly without
-      # running all the other rewite tests on it
+      # running all the other rewrite tests on it
       if (-f $request_filename) { 
         break; 
       }
@@ -88,6 +98,37 @@ http {
       }
     <% end %>
   }
+  
+  <% if @node[:nginx][:varnish_proxy] %>
+  server {
+    listen   443;
+    ssl on;
+    ssl_certificate /etc/ssl/certs/fr2_admin.crt;
+    ssl_certificate_key /etc/ssl/private/fr2_admin.key;
+    
+    server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
+    
+    # redirect www
+    if ($host ~* www\.(.*)) {
+      set $host_without_www $1;
+      rewrite ^(.*)$ https://$host_without_www$1 permanent; # $1 contains '/foo', not 'www.mydomain.com/foo'
+    }
+    
+    access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-access.log;
+    error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-error.log;
+    
+    location / {
+      proxy_pass             http://varnish;
+      proxy_redirect         http://varnish/ http://$host:$server_port/;
+      proxy_set_header       Host $host;
+      proxy_set_header       X-Real-IP $remote_addr;
+      proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header       X-Client-Verify SUCCESS;
+      proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
+      proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+    }
+  }
+  <% end %>
 
   include <%= @node[:nginx][:dir] %>/conf.d/*.conf;
   #include <%= @node[:nginx][:dir] %>/sites-enabled/*;
