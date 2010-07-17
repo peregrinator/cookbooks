@@ -57,9 +57,10 @@ sub vcl_recv {
         remove req.http.Accept-Encoding;
     }
     
+    # NOT NEEDED WHEN USING A PROXY SERVER IN FRONT LIKE NGINX
     # Add a unique header containing the client address
-    remove req.http.X-Forwarded-For;
-    set    req.http.X-Forwarded-For = client.ip;
+    # remove req.http.X-Forwarded-For;
+    # set    req.http.X-Forwarded-For = client.ip;
     
     # Pass POSTs etc directly on to the backend
     if (req.request != "GET" && req.request != "HEAD") {
