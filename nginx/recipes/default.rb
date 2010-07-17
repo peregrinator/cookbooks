@@ -18,6 +18,8 @@
 # limitations under the License.
 #
 
+include_recipe 'nginx:vhost'
+
 package "nginx"
 
 directory node[:nginx][:log_dir] do
@@ -35,10 +37,6 @@ end
   end
 end
 
-directory "#{node[:nginx][:host_name]}" do
-  action :create
-  recursive true
-end
 
 template "nginx.conf" do
   path "#{node[:nginx][:dir]}/nginx.conf"

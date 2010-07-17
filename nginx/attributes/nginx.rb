@@ -51,6 +51,9 @@ default[:nginx][:worker_processes]   = cpu[:total]
 default[:nginx][:worker_connections] = 2048
 default[:nginx][:server_names_hash_bucket_size] = 64
 
+default[:nginx][:logrotate][:vhost][:interval] = 'daily'
+default[:nginx][:logrotate][:vhost][:keep_for] = '365'
+
 # default acts funny with false defaults (it overwrites true and is thus always false!)
 #default[:nginx][:varnish_proxy] = false
 default[:nginx][:varnish_proxy_host] = '127.0.0.1'
