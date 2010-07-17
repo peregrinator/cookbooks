@@ -1,0 +1,9 @@
+<%= @log_path %>/*.log {
+	<%= @interval %>
+	dateext
+	missingok
+	rotate <%= @keep_for %>
+	copytruncate
+	notifempty
+	compress
+}
