@@ -48,7 +48,7 @@ end
 
 # add location for varnish errors if it happens to go down
 # or can't reach the app servers
-if node[:chef][:roles].include?('proxy') do
+if node[:chef][:roles].include?('proxy')
   directory "/var/www/apps/fr2/current/public/images" do
     action :create
     recursive true
