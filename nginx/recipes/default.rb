@@ -46,12 +46,34 @@ template "nginx.conf" do
   mode 0644
 end
 
-# template "#{node[:nginx][:dir]}/sites-available/default" do
-#   source "default-site.erb"
-#   owner "root"
-#   group "root"
-#   mode 0644
-# end
+# add location for varnish errors if it happens to go down
+# or can't reach the app servers
+if node[:chef][:roles].include?('proxy') do
+  directory "/var/www/apps/fr2/current/public/images" do
+    action :create
+    recursive true
+  end
+  
+  execute "Get file for 502 & 503 errors from s3" do
+    cwd "/var/www/apps/fr2/current/public"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:502_503_proxy.html 502_503_proxy.html"
+  end
+  
+  execute "Get image header_bg.png for 502 & 503 errors from s3" do
+    cwd "/var/www/apps/fr2/current/public/images"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:images/header_bg.png header_bg.png"
+  end
+  
+  execute "Get image seal.png for 502 & 503 errors from s3" do
+    cwd "/var/www/apps/fr2/current/public/images"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:images/seal.png seal.png"
+  end
+  
+  execute "Get image logotype.png for 502 & 503 errors from s3" do
+    cwd "/var/www/apps/fr2/current/public/images"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:images/logotype.png logotype.png"
+  end
+end
 
 service "nginx" do
   supports :status => true, :restart => true, :reload => true

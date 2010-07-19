@@ -91,6 +91,7 @@ http {
       proxy_set_header       X-Client-Verify SUCCESS;
       proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
       proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+      proxy_intercept_errors on;
       <% elsif @node[:chef][:roles].include?('static') %>
       # doc root
       root <%= @node[:nginx][:doc_root] %>;
@@ -102,6 +103,14 @@ http {
       }
       <% end %>      
     }
+    
+    <% if @node[:chef][:roles].include?('proxy') %>
+      error_page 502 503 /502_503_proxy.html;  
+      location = /502_503_proxy.html {  
+          root  <%= @node[:nginx][:doc_root] %>;  
+      }
+    <% end %>
+    
     
     <% if @node[:chef][:roles].include?('static') %>
       error_page 500  /500_static.html;  
