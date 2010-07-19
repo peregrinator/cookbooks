@@ -51,6 +51,14 @@ http {
     listen <%= @node[:nginx][:listen_port] %>;
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
     
+    if ( $host = 'federalregister.gov' ) {
+      rewrite ^(.*)$ http://www.federalregister.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
+    }
+    
+    if ( $host = 'federalregister.gov' ) {
+      rewrite ^(.*)$ http://www.ofr.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
+    }
+    
     access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/access.log;
     error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/error.log;
 
@@ -61,7 +69,15 @@ http {
     <% end %>
     
     location / {
+      # ofr redirects for old pages
+      rewrite  /inspection.aspx        http://www.ofr.gov/inspection.aspx        permanent;
+      rewrite  /Privacy/AGENCIES.aspx  http://www.ofr.gov/Privacy/AGENCIES.aspx  permanent;
+      rewrite  /Catalog.aspx           http://www.ofr.gov/Catalog.aspx           permanent;
+      rewrite  /AboutUs.aspx           http://www.ofr.gov/AboutUs.aspx           permanent;
+      rewrite  /ContactUs.aspx         http://www.ofr.gov/ContactUs.aspx         permanent;
+      
       client_max_body_size <%= @node[:nginx][:client_max_body_size] %>;
+      
       
       <% if @node[:nginx][:varnish_proxy] %>
       auth_basic            "Restricted";
