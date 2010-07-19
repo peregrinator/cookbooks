@@ -1,6 +1,7 @@
 <%= @log_path %>/*.log {
 	<%= @interval %>
 	missingok
+	dateext
 	rotate <%= @keep_for %>
 	compress
 	delaycompress

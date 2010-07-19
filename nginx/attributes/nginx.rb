@@ -52,7 +52,7 @@ default[:nginx][:worker_connections] = 2048
 default[:nginx][:server_names_hash_bucket_size] = 64
 
 default[:nginx][:logrotate][:vhost][:interval] = 'daily'
-default[:nginx][:logrotate][:vhost][:keep_for] = '365'
+default[:nginx][:logrotate][:vhost][:keep_for] = '7'
 
 # default acts funny with false defaults (it overwrites true and is thus always false!)
 #default[:nginx][:varnish_proxy] = false
