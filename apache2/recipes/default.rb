@@ -216,16 +216,19 @@ file "/etc/apache2/sites-enabled/site" do
   notifies :reload, resources(:service => "apache2")
 end
 
-if node[:ec2] && node[:chef][:roles].include?('staging')
-  mount "/var/log/apache2" do
-    device "/vol/log/apache2"
-    fstype "none"
-    options "bind"
-    action [:enable, :mount]
-    # Do not execute if its already mounted (ubunutu/linux only)
-    not_if "cat /proc/mounts | grep /var/log/apache2"
+if node[:ec2] && (node[:chef][:roles].include?('staging') || node[:chef][:roles].include?('app'))
+  # create a logrotate conf file for the app
+  template "/etc/logrotate.d/apache2" do
+    source "logrotate.erb"
+    variables :log_path  => "/var/log/apache2",
+              :internval => node[:apache][:logrotate][:interval],
+              :keep_for  => node[:apache][:logrotate][:keep_for]
+    mode 0644
+    owner "root"
+    group "root"
   end
 end
+
 
 
 service "apache2" do

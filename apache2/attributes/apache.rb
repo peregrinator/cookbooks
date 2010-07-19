@@ -82,3 +82,7 @@ default[:apache][:server_aliases] = ""
 default[:apache][:docroot] = "/var/www"
 default[:apache][:name] = "site"
 default[:apache][:vhost_port] = "80"
+
+# Log rotation
+default[:apache][:logrotate][:interval] = 'daily'
+default[:apache][:logrotate][:keep_for] = '7'
