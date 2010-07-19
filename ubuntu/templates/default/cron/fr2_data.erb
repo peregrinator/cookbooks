@@ -1,3 +1,3 @@
 # /etc/cron.d/fr2_data: crontab fragment for 
 # retrieving the xml data, etc from the gpo
-0 16 	* * 1-5	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/local/bin/rake RAILS_ENV=<%=@rails_env%> data:daily >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/cron.log  2>&1
+00 10 	* * 1-5	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/local/bin/rake RAILS_ENV=<%=@rails_env%> data:daily >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/cron.log  2>&1

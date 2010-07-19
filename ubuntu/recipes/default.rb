@@ -87,6 +87,19 @@ package "apache2-utils" do
   action :install
 end
 
+if node[:ec2]
+  # used for backups on ec2
+  package "ec2-consistent-snapshot" do
+    action :install
+  end
+  
+  # used for getting newly spun up servers up to date
+  # ie pull from git, set proper backup cron jobs, etc.
+  package "runurl" do
+    action :install
+  end
+end
+
 ####################################
 #
 # GROUP SETUP
@@ -254,6 +267,28 @@ if node[:chef][:roles].include?('worker') || node[:chef][:roles].include?('stagi
               :run_user       => node[:capistrano][:deploy_user]
     source "cron/fr2_data.erb"
     mode 0644
+  end
+end
+
+# create log for backups this allows us to troubleshoot log backups
+directory "/var/log/cron" do
+  owner 'root'
+  group 'root'
+  mode 0744
+  recursive true
+  action :create
+  not_if do File.directory?("/var/log/cron") end
+end
+
+file "/var/log/cron/backup.log" do
+  action :create
+  only_if do ! File.exists?("/var/log/cron/backup.log") end
+end
+
+if node[:chef][:roles].include?('staging') || node[:chef][:roles].include?('worker')
+  file "/var/log/cron/fr2_data.log" do
+    action :create
+    only_if do ! File.exists?("/var/log/cron/fr2_data.log") end
   end
 end
 
