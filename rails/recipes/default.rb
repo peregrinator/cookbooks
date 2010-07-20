@@ -19,7 +19,7 @@
 
 #include_recipe "ruby"
 
-include_recipe "rails:logrotate"
+include_recipe "rails::logrotate"
 
 %w{ rails actionmailer actionpack activerecord activesupport activeresource }.each do |rails_gem|
   gem_package rails_gem do
