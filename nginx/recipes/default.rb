@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 
-include_recipe 'nginx:vhost'
+include_recipe 'nginx::vhost'
 
 package "nginx"
 
@@ -49,7 +49,7 @@ end
 # add location for varnish errors if it happens to go down
 # or can't reach the app servers
 if node[:chef][:roles].include?('proxy')
-  directory "/var/www/apps/fr2/current/public/images" do
+  directory "/var/www/apps/fr2/current/public/nginx" do
     action :create
     recursive true
   end
@@ -60,17 +60,17 @@ if node[:chef][:roles].include?('proxy')
   end
   
   execute "Get image header_bg.png for 502 & 503 errors from s3" do
-    cwd "/var/www/apps/fr2/current/public/images"
+    cwd "/var/www/apps/fr2/current/public/nginx"
     command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:images/header_bg.png header_bg.png"
   end
   
   execute "Get image seal.png for 502 & 503 errors from s3" do
-    cwd "/var/www/apps/fr2/current/public/images"
+    cwd "/var/www/apps/fr2/current/public/nginx"
     command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:images/seal.png seal.png"
   end
   
   execute "Get image logotype.png for 502 & 503 errors from s3" do
-    cwd "/var/www/apps/fr2/current/public/images"
+    cwd "/var/www/apps/fr2/current/public/nginx"
     command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:images/logotype.png logotype.png"
   end
 end

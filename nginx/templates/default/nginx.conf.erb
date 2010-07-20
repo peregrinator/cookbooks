@@ -68,6 +68,10 @@ http {
     }
     <% end %>
     
+    location /nginx {
+      root  <%= @node[:nginx][:doc_root] %>;
+    }
+    
     location / {
       # ofr redirects for old pages
       rewrite  /inspection.aspx        http://www.ofr.gov/inspection.aspx        permanent;
