@@ -73,6 +73,12 @@ http {
       root  <%= @node[:nginx][:doc_root] %>;
     }
     
+    <% if @node[:chef][:roles].include?('static') %>
+    location ~* ^/sitemap {
+       expires 0s;
+    }
+    <% end %>
+    
     location / {
       # ofr redirects for old pages
       rewrite  /inspection.aspx        http://www.ofr.gov/inspection.aspx        permanent;
@@ -101,8 +107,10 @@ http {
       proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
       proxy_intercept_errors on;
       <% elsif @node[:chef][:roles].include?('static') %>
+      
       # set cache control
       expires 1y;
+      
       # mark these as public so they get cached on SSL connections in FF
       # see http://blog.pluron.com/2008/07/why-you-should.html
       add_header Cache-Control public;

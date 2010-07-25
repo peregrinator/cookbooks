@@ -25,23 +25,6 @@ director app_director round-robin {
 }
 
 sub vcl_recv {
-    # serve slightly stale content while a fresh version is fetched
-    #   better user experience and no thread pile up on the app servers
-    set req.grace = 2m;
-  
-    # set the backend server based on request (if multi-server stack)
-  <% if @node[:chef][:roles].include?('staging') %>
-    set req.backend = app_server_1;
-  <% elsif @node[:chef][:roles].include?('proxy') %>
-    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemaps|/articles/html|/articles/xml|/regulations/html)") {
-      set req.backend = static_server;
-      return (lookup);
-    } else {
-      set req.backend = app_director;
-    }
-  <% end %>
-    
-  
     # Reject Non-RFC2616 or CONNECT or TRACE requests.
     if (req.request != "GET" &&
       req.request != "HEAD" &&
@@ -56,7 +39,24 @@ sub vcl_recv {
     if (req.http.Accept-Encoding) {
         remove req.http.Accept-Encoding;
     }
+  
+    # serve slightly stale content while a fresh version is fetched
+    # better user experience and no thread pile up on the app servers
+    set req.grace = 24h;
+  
+    # set the backend server based on request (if multi-server stack)
+  <% if @node[:chef][:roles].include?('staging') %>
+    set req.backend = app_server_1;
+  <% elsif @node[:chef][:roles].include?('proxy') %>
+    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html)") {
+      set req.backend = static_server;
+      return (lookup);
+    } else {
+      set req.backend = app_director;
+    }
+  <% end %>
     
+  
     # NOT NEEDED WHEN USING A PROXY SERVER IN FRONT LIKE NGINX
     # Add a unique header containing the client address
     # remove req.http.X-Forwarded-For;
@@ -86,8 +86,8 @@ sub vcl_recv {
 
 sub vcl_fetch {
     # Remove cache headers from going out to client; cache headers are being used for
-    #   varnish, not browser/upstream caches.  Eventually should replace this with a 
-    #   rule that sets everything to a 5 minute cache.
+    # varnish, not browser/upstream caches.
+    # Actual browser/upstream cache is being set by the nginx proxy in front of varnish
     unset beresp.http.Cache-Control;
     
     # The following two sections give 'not accessible' errors...commenting out for now...
@@ -98,11 +98,11 @@ sub vcl_fetch {
     # }
     
     # serve slightly stale content while a fresh version is fetched
-    #    better user experience and no thread pile up on the app servers
-    # set obj.grace = 2m;
+    # better user experience and no thread pile up on the app servers
+    set beresp.grace = 24h;
     
     # Directly serve static content
-    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemaps|/articles/html|/articles/xml|/regulations/html)") {
+    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html)") {
         return(deliver);
     }
     # ESI process the rest
