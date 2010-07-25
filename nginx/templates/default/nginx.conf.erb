@@ -52,13 +52,13 @@ http {
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
     
     if ( $host = 'federalregister.gov' ) {
-      rewrite ^(.*)$ http://www.ofr.gov$1; #someone fat fingered the dns...
-      #rewrite ^(.*)$ http://www.federalregister.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
+      # rewrite ^(.*)$ http://www.ofr.gov$1; #someone fat fingered the dns...
+      rewrite ^(.*)$ http://www.federalregister.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
     }
     
-    if ( $host = 'www.federalregister.gov' ) {
-      rewrite ^(.*)$ http://www.ofr.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
-    }
+    # if ( $host = 'www.federalregister.gov' ) {
+    #   rewrite ^(.*)$ http://www.ofr.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
+    # }
     
     access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/access.log;
     error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/error.log;
@@ -73,11 +73,33 @@ http {
       root  <%= @node[:nginx][:doc_root] %>;
     }
     
-    <% if @node[:chef][:roles].include?('static') %>
     location ~* ^/sitemap {
        expires 0s;
+       
+       proxy_pass             http://varnish;
+       proxy_redirect         http://varnish/ http://$host:$server_port/;
+       proxy_set_header       Host $host;
+       proxy_set_header       X-Real-IP $remote_addr;
+       proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_set_header       X-Client-Verify SUCCESS;
+       proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
+       proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+       proxy_intercept_errors on;
     }
-    <% end %>
+    
+    location ~* ^(/images|/javascripts/stylesheets) {
+       expires 1y;
+       
+       proxy_pass             http://varnish;
+       proxy_redirect         http://varnish/ http://$host:$server_port/;
+       proxy_set_header       Host $host;
+       proxy_set_header       X-Real-IP $remote_addr;
+       proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_set_header       X-Client-Verify SUCCESS;
+       proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
+       proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+       proxy_intercept_errors on;
+    }
     
     location / {
       # ofr redirects for old pages
@@ -91,8 +113,8 @@ http {
       
       
       <% if @node[:nginx][:varnish_proxy] %>
-      auth_basic            "Restricted";
-      auth_basic_user_file  auth/htpasswd;
+      # auth_basic            "Restricted";
+      # auth_basic_user_file  auth/htpasswd;
 
       # set cache control
       expires 5m;
