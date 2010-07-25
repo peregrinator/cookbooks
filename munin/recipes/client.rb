@@ -24,11 +24,27 @@ service "munin-node" do
   action :enable
 end
 
-munin_servers = search(:node, "role:monitoring")
+#munin_servers = search(:node, "role:monitoring")
 
 template "/etc/munin/munin-node.conf" do
   source "munin-node.conf.erb"
   mode 0644
-  variables :munin_servers => munin_servers
+  variables :munin_servers => node[:munin][:servers]
   notifies :restart, resources(:service => "munin-node")
+end
+
+if node[:chef][:roles].include?('app')
+  munin_plugin "passenger_memory_stats" do
+    create_file true
+  end
+
+  munin_plugin "passenger_status" do
+    create_file true
+  end
+  
+  template "/etc/munin/plugin-conf.d/munin-node" do
+    source "plugins/munin-node.erb"
+    mode 0644
+    notifies :restart, resources(:service => "munin-node")
+  end
 end

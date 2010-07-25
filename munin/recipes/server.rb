@@ -17,9 +17,9 @@
 # limitations under the License.
 #
 
-include_recipe "apache2"
-include_recipe "apache2::mod_auth_openid"
-include_recipe "apache2::mod_rewrite"
+#include_recipe "apache2"
+#include_recipe "apache2::mod_auth_openid"
+#include_recipe "apache2::mod_rewrite"
 include_recipe "munin::client"
 
 package "munin"
@@ -32,36 +32,36 @@ remote_file "/etc/cron.d/munin" do
   backup 0
 end
 
-munin_servers = search(:node, "hostname:[* TO *] AND role:#{node[:app_environment]}")
+#munin_servers = search(:node, "hostname:[* TO *] AND role:#{node[:app_environment]}")
 
-if node[:public_domain]
-  case node[:app_environment]
-  when "production"
-    public_domain = node[:public_domain]
-  else
-    public_domain = "#{node[:app_environment]}.#{node[:public_domain]}"
-  end
-else
-  public_domain = node[:domain]
-end
+# if node[:public_domain]
+#   case node[:app_environment]
+#   when "production"
+#     public_domain = node[:public_domain]
+#   else
+#     public_domain = "#{node[:app_environment]}.#{node[:public_domain]}"
+#   end
+# else
+#   public_domain = node[:domain]
+# end
 
 template "/etc/munin/munin.conf" do
   source "munin.conf.erb"
   mode 0644
-  variables(:munin_nodes => munin_servers)
+  variables(:munin_nodes => node[:munin][:nodes])
 end
 
-apache_site "000-default" do
-  enable false
-end
+# apache_site "000-default" do
+#   enable false
+# end
 
-template "#{node[:apache][:dir]}/sites-available/munin.conf" do
-  source "apache2.conf.erb"
-  mode 0644
-  variables :public_domain => public_domain
-  if File.symlink?("#{node[:apache][:dir]}/sites-enabled/munin.conf")
-    notifies :reload, resources(:service => "apache2")
-  end
-end
+# template "#{node[:apache][:dir]}/sites-available/munin.conf" do
+#   source "apache2.conf.erb"
+#   mode 0644
+#   variables :public_domain => public_domain
+#   if File.symlink?("#{node[:apache][:dir]}/sites-enabled/munin.conf")
+#     notifies :reload, resources(:service => "apache2")
+#   end
+# end
 
-apache_site "munin.conf"
+#apache_site "munin.conf"
