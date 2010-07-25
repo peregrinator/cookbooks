@@ -44,6 +44,11 @@ if node[:ec2]
     command "apt-key adv --keyserver keys.gnupg.net --recv-keys BE09C571"
     user 'root'
   end
+  
+  # xfs file system tools (for EBS volumes)
+  package 'xfsprogs' do
+    action :install
+  end
 end
 
 # 10-gen source for MongoDB
@@ -223,16 +228,16 @@ if node[:ec2]
     to "/mnt/.awssecret"
   end
 
-  template "/etc/cron.d/ebs_backup" do
-    variables :ebs_volume_id => node[:aws][:ebs][:volume_id],
-              :mysql_user    => 'root', 
-              :mysql_passwd  => node[:mysql][:server_root_password],
-              :description   => node[:apache][:name],
-              :log           => node[:ubuntu][:backup_log_dir],
-              :roles         => node[:chef][:roles]
-    source "cron/ebs_backup.erb"
-    mode 0644
-  end
+  # template "/etc/cron.d/ebs_backup" do
+  #     variables :ebs_volume_id => node[:aws][:ebs][:volume_id],
+  #               :mysql_user    => 'root', 
+  #               :mysql_passwd  => node[:mysql][:server_root_password],
+  #               :description   => node[:apache][:name],
+  #               :log           => node[:ubuntu][:backup_log_dir],
+  #               :roles         => node[:chef][:roles]
+  #     source "cron/ebs_backup.erb"
+  #     mode 0644
+  #   end
   
   execute "Get Amazon private key" do
     cwd "/mnt"
@@ -316,4 +321,30 @@ template "/etc/hosts" do
             :sphinx_alias        => node[:ubuntu][:sphinx][:alias]
   source "etc_hosts.erb"
   mode 0644
+end
+
+####################################
+#
+# SSH SETUP
+#
+####################################
+
+service "ssh" do
+  case node[:platform]
+  when "centos","redhat","fedora"
+    service_name "sshd"
+  else
+    service_name "ssh"
+  end
+  supports :restart => true
+  action [ :enable, :start ]
+end
+
+remote_file "/etc/ssh/ssh_config" do
+  source "ssh/ssh_config"
+  owner "root"
+  group "root"
+  mode "0755"
+  action :create
+  notifies :restart, resources(:service => "ssh")
 end
