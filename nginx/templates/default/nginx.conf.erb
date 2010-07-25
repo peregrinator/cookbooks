@@ -88,6 +88,9 @@ http {
       auth_basic            "Restricted";
       auth_basic_user_file  auth/htpasswd;
 
+      # set cache control
+      expires 5m;
+
       proxy_pass             http://varnish;
       proxy_redirect         http://varnish/ http://$host:$server_port/;
       proxy_set_header       Host $host;
@@ -98,6 +101,12 @@ http {
       proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
       proxy_intercept_errors on;
       <% elsif @node[:chef][:roles].include?('static') %>
+      # set cache control
+      expires 1y;
+      # mark these as public so they get cached on SSL connections in FF
+      # see http://blog.pluron.com/2008/07/why-you-should.html
+      add_header Cache-Control public;
+      
       # doc root
       root <%= @node[:nginx][:doc_root] %>;
       
