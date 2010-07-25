@@ -52,10 +52,11 @@ http {
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
     
     if ( $host = 'federalregister.gov' ) {
-      rewrite ^(.*)$ http://www.federalregister.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
+      rewrite ^(.*)$ http://www.ofr.gov$1; #someone fat fingered the dns...
+      #rewrite ^(.*)$ http://www.federalregister.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
     }
     
-    if ( $host = 'federalregister.gov' ) {
+    if ( $host = 'www.federalregister.gov' ) {
       rewrite ^(.*)$ http://www.ofr.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
     }
     
