@@ -145,6 +145,9 @@ http {
     ssl_certificate /etc/ssl/certs/fr2_admin.crt;
     ssl_certificate_key /etc/ssl/private/fr2_admin.key;
     
+    ssl_protocols SSLv3 TLSv1;
+    ssl_ciphers HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3:!ADH:!aNULL:!eNULL:!NULL:!LOW:!EXP:RC4+RSA;
+    
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
     
     # redirect www
