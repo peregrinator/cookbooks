@@ -31,7 +31,7 @@ end
 template "/etc/logrotate.d/nginx-#{node[:nginx][:host_name]}" do
   source "logrotate.erb"
   variables :log_path  => "#{node[:nginx][:log_dir]}/#{node[:nginx][:host_name]}",
-            :internval => node[:nginx][:logrotate][:vhost][:interval],
+            :interval  => node[:nginx][:logrotate][:vhost][:interval],
             :keep_for  => node[:nginx][:logrotate][:vhost][:keep_for]
   mode 0644
   owner "root"

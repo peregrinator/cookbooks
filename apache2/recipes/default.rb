@@ -221,7 +221,7 @@ if node[:ec2] && (node[:chef][:roles].include?('staging') || node[:chef][:roles]
   template "/etc/logrotate.d/apache2" do
     source "logrotate.erb"
     variables :log_path  => "/var/log/apache2",
-              :internval => node[:apache][:logrotate][:interval],
+              :interval  => node[:apache][:logrotate][:interval],
               :keep_for  => node[:apache][:logrotate][:keep_for]
     mode 0644
     owner "root"
