@@ -275,6 +275,17 @@ if node[:chef][:roles].include?('worker') || node[:chef][:roles].include?('stagi
   end
 end
 
+# customize syslog rotation (based on 9.10 rsyslog defaults)
+template "/etc/logrotate.d/rsyslog" do
+  source "syslog_logrotate.erb"
+  variables :log_path  => "/var/log/syslog",
+            :interval  => node[:ubuntu][:logrotate][:syslog][:interval],
+            :keep_for  => node[:ubuntu][:logrotate][:syslog][:keep_for]
+  mode 0644
+  owner "root"
+  group "root"
+end
+
 # create log for backups this allows us to troubleshoot log backups
 directory "/var/log/cron" do
   owner 'root'
