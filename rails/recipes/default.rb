@@ -70,19 +70,19 @@ end
 
 execute "Get private config file amazon.yml" do
   cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
-  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:amazon.yml amazon.yml"
+  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:amazon.yml amazon.yml"
   user "#{node[:capistrano][:deploy_user]}"
   group "#{node[:capistrano][:deploy_user]}"
 end
 execute "Get private config file api_keys.yml" do
   cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
-  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:api_keys.yml api_keys.yml"
+  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:api_keys.yml api_keys.yml"
   user "#{node[:capistrano][:deploy_user]}"
   group "#{node[:capistrano][:deploy_user]}"
 end
 execute "Get private config file cloudkicker_config.rb" do
   cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
-  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:cloudkicker_config.rb cloudkicker_config.rb"
+  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:cloudkicker_config.rb cloudkicker_config.rb"
   user "#{node[:capistrano][:deploy_user]}"
   group "#{node[:capistrano][:deploy_user]}"
 end
