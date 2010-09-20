@@ -88,7 +88,7 @@ execute "Get private config file cloudkicker_config.rb" do
 end
 
 gem_package "bundler" do
-  version "0.9.26"
+  version "1.0.0"
 end
 
 link "/usr/bin/bundle" do
