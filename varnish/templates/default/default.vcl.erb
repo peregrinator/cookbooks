@@ -1,18 +1,18 @@
 <% @node[:varnish][:app_proxy_host].each_with_index do |host, i| %>
-  backend app_server_<%= i+1 %> {
-    .host = "<%= host %>";
-    .port = "<%= @node[:varnish][:app_proxy_port] %>";
-    .probe = {
-               .url = "<%= @node[:varnish][:app_proxy_host_probe_url] %>";
-               .interval = 5s;
-               .timeout = 1 s;
-               .window = 5;
-               .threshold = 3;
-    }
+backend app_server_<%= i+1 %> {
+  .host = "<%= host %>";
+  .port = "<%= @node[:varnish][:app_proxy_port] %>";
+  .probe = {
+             .url = "<%= @node[:varnish][:app_proxy_host_probe_url] %>";
+             .interval = 5s;
+             .timeout = 1 s;
+             .window = 5;
+             .threshold = 3;
   }
+}
 <% end %>
 
-
+<% if @node[:chef][:roles].include?('proxy') %>
 backend static_server {
   .host = "<%= @node[:varnish][:static_proxy_host] %>";
   .port = "<%= @node[:varnish][:static_proxy_port] %>";
@@ -23,6 +23,7 @@ director app_director round-robin {
     { .backend = app_server_<%= i+1 %>; }
   <% end %>
 }
+<% end %>
 
 sub vcl_recv {
     # Reject Non-RFC2616 or CONNECT or TRACE requests.
@@ -78,7 +79,7 @@ sub vcl_recv {
     }
 
     # Prevent duplication of caches
-    set req.http.host = "<%= @node[:varnish][:proxy_host_name] %>";
+    set req.http.host = "www.<%= @node[:varnish][:proxy_host_name] %>";
     
     # Check to see if cached
     return (lookup);
