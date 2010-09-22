@@ -59,14 +59,14 @@ elsif node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worke
   end
 end
 
-template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/sphinx.yml" do
-  variables :server_address => node[:sphinx][:server_address],
-            :server_port    => node[:sphinx][:server_port],
-            :memory_limit   => node[:sphinx][:memory_limit],
-            :version        => node[:sphinx][:version]
-  source "sphinx.yml.erb"
-  mode 0644
-end
+# template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/sphinx.yml" do
+#   variables :server_address => node[:sphinx][:server_address],
+#             :server_port    => node[:sphinx][:server_port],
+#             :memory_limit   => node[:sphinx][:memory_limit],
+#             :version        => node[:sphinx][:version]
+#   source "sphinx.yml.erb"
+#   mode 0644
+# end
 
 execute "Get private config file amazon.yml" do
   cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
