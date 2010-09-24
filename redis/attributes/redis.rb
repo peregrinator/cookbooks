@@ -1,7 +1,8 @@
-set_unless[:redis][:address]  = "0.0.0.0"
+set_unless[:redis][:address]  = "127.0.0.1"
 set_unless[:redis][:port]  = "6379"
 set_unless[:redis][:pidfile] = "/var/run/redis.pid"
 set_unless[:redis][:logfile] = "/var/log/redis.log"
+set_unless[:redis][:loglevel] = 'notice'
 set_unless[:redis][:dbdir] = "/var/lib/redis"
 set_unless[:redis][:dbfile] = "dump.rdb"
 set_unless[:redis][:client_timeout] = "300"
