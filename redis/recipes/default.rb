@@ -18,8 +18,30 @@
 # limitations under the License.
 #
 
-package "redis" do
-  action :install
+remote_file "/tmp/redis-#{node[:redis][:version]}.tar.gz" do
+  source "#{node[:redis][:source_url]}.tar.gz"
+  not_if { ::File.exists?("/tmp/redis-#{node[:ruby_enterprise][:version]}.tar.gz") }
+end
+
+directory node[:redis][:bin_path] do
+  mode 0755
+  action :create
+  recursuve true
+end
+
+bash "Install Redis #{node[:redis][:version]} from source" do
+  cwd "/tmp"
+  code <<-EOH
+  tar xvzf redis-#{node[:redis][:version]}.tar.gz
+  cd redis-#{node[:redis][:version]}
+  make
+  cp -f redis-server "#{node[:redis][:bin_path]}/" && cp redis-cli "#{node[:redis][:bin_path]}/"
+  EOH
+
+  not_if do
+    ::File.exists?("#{node[:ruby_enterprise][:install_path]}/bin/ree-version") &&
+    system("#{node[:ruby_enterprise][:install_path]}/bin/ree-version | grep -q '#{node[:ruby_enterprise][:version]}$'")
+  end
 end
 
 service "redis" do

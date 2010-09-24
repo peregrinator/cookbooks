@@ -1,3 +1,7 @@
+set_unless[:redis][:version]  = "2.0.2"
+set_unless[:redis][:source_url] = "http://redis.googlecode.com/files/redis-#{redis[:version]}"
+set_unless[:redis][:bin_path] = "/usr/local/bin"
+
 set_unless[:redis][:address]  = "127.0.0.1"
 set_unless[:redis][:port]  = "6379"
 set_unless[:redis][:pidfile] = "/var/run/redis.pid"
