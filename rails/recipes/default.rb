@@ -96,7 +96,7 @@ link "/usr/bin/bundle" do
 end
 
 execute "bundle install" do
-  command "bundle install /home/deploy/.bundle --gemfile #{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/Gemfile --without development test"
+  command "bundle install --deployment --gemfile #{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/Gemfile --without development test"
   user "#{node[:capistrano][:deploy_user]}"
   group "#{node[:capistrano][:deploy_user]}"
   action :nothing
