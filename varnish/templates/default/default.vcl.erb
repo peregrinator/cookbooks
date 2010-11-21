@@ -73,11 +73,6 @@ sub vcl_recv {
         return (pass);
     }
 
-    # Remove cookies for anything that doesn't match the following
-    if (req.url !~ "^(/login|/logout|/admin)") {
-      unset req.http.cookie;
-    }
-
     # Prevent duplication of caches
     set req.http.host = "www.<%= @node[:varnish][:proxy_host_name] %>";
     
@@ -93,11 +88,6 @@ sub vcl_fetch {
     
     # The following two sections give 'not accessible' errors...commenting out for now...
     
-    # Remove cookies for anything that doesn't match the following
-    # if (req.url !~ "^(/login|/logout|/admin)") {
-    #   unset obj.http.set-cookie;
-    # }
-    
     # serve slightly stale content while a fresh version is fetched
     # better user experience and no thread pile up on the app servers
     set beresp.grace = 24h;
@@ -112,4 +102,20 @@ sub vcl_fetch {
     }
 }
 
+# vcl_hash creates the key for varnish under which the object is stored. It is
+# possible to store the same url under 2 different keys, by making vcl_hash
+# create a different hash.
+sub vcl_hash {
 
+    # these 2 entries are the default ones used for vcl. Below we add our own.
+    set req.hash += req.url;
+    set req.hash += req.http.host;
+    
+    # Hash differently based on presence of javascript_enabled cookie.
+    if( req.url ~ "^/articles/search/header" && req.http.Cookie ~ "javascript_enabled=1" ) {
+        # add this fact to the hash
+        set req.hash += "javascript enabled";
+    }
+    
+    return(hash);
+}
