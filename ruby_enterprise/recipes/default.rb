@@ -62,7 +62,7 @@ directory "/usr/lib/ruby" do
   action :delete
 end
 
-link "/usr/bin" do
+link "/usr/bin/ruby" do
   to "#{node[:ruby_enterprise][:install_path]}/bin/ruby"
 end
 link "/usr/bin/ruby1.8" do
