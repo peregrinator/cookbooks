@@ -17,33 +17,60 @@
 # limitations under the License.
 #
 
-package "ruby" do
-  action :install
-end
-
-extra_packages = case node[:platform]
-  when "ubuntu","debian"
-    %w{
-      ruby1.8
-      ruby1.8-dev
-      rdoc1.8
-      ri1.8
-      libopenssl-ruby
-    }
-  when "centos","redhat","fedora"
-    %w{
-      ruby-libs
-      ruby-devel
-      ruby-docs
-      ruby-ri
-      ruby-irb
-      ruby-rdoc
-      ruby-mode
-    }
+case node[:ruby][:version]
+when '1.8'
+  package "ruby" do
+    action :install
   end
 
-extra_packages.each do |pkg|
-  package pkg do
-    action :install
+  extra_packages = case node[:platform]
+    when "ubuntu","debian"
+      %w{
+        ruby1.8
+        ruby1.8-dev
+        rdoc1.8
+        ri1.8
+        libopenssl-ruby
+      }
+    when "centos","redhat","fedora"
+      %w{
+        ruby-libs
+        ruby-devel
+        ruby-docs
+        ruby-ri
+        ruby-irb
+        ruby-rdoc
+        ruby-mode
+      }
+    end
+
+  extra_packages.each do |pkg|
+    package pkg do
+      action :install
+    end
+  end
+when '1.9'
+  remote_file 'tmp/ruby-1.9.2-p0.tar.gz' do
+    source 'ftp://ftp.ruby-lang.org//pub/ruby/1.9/ruby-1.9.2-p0.tar.gz'
+    not_if { ::File.exists?("/tmp/ruby-1.9.2-p0.tar.gz") || 
+             (::File.exists?("/usr/local/bin/ruby") &&
+                system("/usr/local/bin/ruby -v | grep -q '1.9.2p0$'") )
+           }
+  end
+  
+  bash "Install Ruby 1.9.2p0 from source" do
+    cwd "/tmp"
+    code <<-EOH
+    tar xvzf ruby-1.9.2-p0.tar.gz
+    cd ruby-1.9.2-p0
+    ./configure
+    make
+    make install
+    EOH
+
+    not_if do
+      ::File.exists?("/usr/local/bin/ruby") &&
+      system("/usr/local/bin/ruby -v | grep -q '1.9.2p0$'")
+    end
   end
 end

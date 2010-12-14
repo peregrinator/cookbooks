@@ -1,0 +1,1 @@
+default_unless[:ruby][:version] = "1.8"
