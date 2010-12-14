@@ -39,8 +39,8 @@ bash "Install Redis #{node[:redis][:version]} from source" do
   EOH
 
   not_if do
-    ::File.exists?("#{node[:ruby_enterprise][:install_path]}/bin/ree-version") &&
-    system("#{node[:ruby_enterprise][:install_path]}/bin/ree-version | grep -q '#{node[:ruby_enterprise][:version]}$'")
+    ::File.exists?("#{node[:redis][:bin_path]}") &&
+    system("#{node[:redis][:bin_path]} -v | grep -q '#{node[:redis][:version]}$'")
   end
 end
 
