@@ -32,14 +32,6 @@ include_recipe "rails::logrotate"
   end
 end
 
-directory "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/current/public/articles" do
-  owner "#{node[:capistrano][:deploy_user]}"
-  group "#{node[:capistrano][:deploy_user]}"
-  mode 0755
-  action :create
-  recursive true
-end
-
 if node[:chef][:roles].include?('staging')
   template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
     variables :host          => node[:ubuntu][:database][:fqdn],
@@ -58,15 +50,6 @@ elsif node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worke
     mode 0644
   end
 end
-
-# template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/sphinx.yml" do
-#   variables :server_address => node[:sphinx][:server_address],
-#             :server_port    => node[:sphinx][:server_port],
-#             :memory_limit   => node[:sphinx][:memory_limit],
-#             :version        => node[:sphinx][:version]
-#   source "sphinx.yml.erb"
-#   mode 0644
-# end
 
 execute "Get private config file amazon.yml" do
   cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
