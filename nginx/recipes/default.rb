@@ -46,6 +46,20 @@ template "nginx.conf" do
   mode 0644
 end
 
+directory "#{node[:nginx][:dir]}/conf.d" do
+  mode 0755
+  owner node[:nginx][:user]
+  action :create
+  recursive true
+end
+
+directory "#{node[:nginx][:dir]}/sites-enabled" do
+  mode 0755
+  owner node[:nginx][:user]
+  action :create
+  recursive true
+end
+
 # add location for varnish errors if it happens to go down
 # or can't reach the app servers
 if node[:chef][:roles].include?('proxy')
