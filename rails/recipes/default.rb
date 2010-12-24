@@ -32,21 +32,26 @@ include_recipe "rails::logrotate"
   end
 end
 
-if node[:chef][:roles].include?('staging')
-  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
-    variables :host          => node[:ubuntu][:database][:fqdn],
-              :password      => node[:mysql][:server_root_password],
-              :database_name => node[:mysql][:database_name]
-    source "staging.database.yml.erb"
-    mode 0644
-  end
-elsif node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
-  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
-    variables :host          => node[:ubuntu][:database][:fqdn], 
+case node[:rails][:db_adapter]
+when 'mysql'
+  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/config/database.yml" do
+    variables :environment   => node[:rails][:environment],
+              :host          => node[:ubuntu][:database][:fqdn], 
               :port          => node[:mysql][:server_port],
               :database_name => node[:mysql][:database_name],
               :password      => node[:mysql][:server_root_password]
-    source "app_server.database.yml.erb"
+    source "database/mysql.database.yml.erb"
+    mode 0644
+  end
+when 'mongoid'
+  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/config/mongoid.yml" do
+    variables :environment   => node[:rails][:environment],
+              :host          => node[:mongodb][:bind_address], 
+              :port          => node[:mongodb][:port],
+              :database_name => node[:mongodb][:database],
+              :password      => node[:mongodb][:password],
+              :username      => node[:mongodb][:username]
+    source "database/mongoid.yml.erb"
     mode 0644
   end
 end

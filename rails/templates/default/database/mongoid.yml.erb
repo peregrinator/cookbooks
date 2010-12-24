@@ -1,0 +1,14 @@
+# defaults: &defaults
+  # host: localhost
+  # slaves:
+  #   - host: slave1.local
+  #     port: 27018
+  #   - host: slave2.local
+  #     port: 27019
+
+<%= @environment %>:
+  host: <%= @host %>
+  port: <%= @port %>
+  username: <%= @username %>
+  password: <%= @password %>
+  database: <%= @database_name %>
