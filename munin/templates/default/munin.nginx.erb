@@ -1,0 +1,21 @@
+server {
+  listen 4950;
+  ssl on;
+  ssl_certificate /etc/ssl/certs/<%= @node[:nginx][:ssl_cert_name] %>;
+  ssl_certificate_key /etc/ssl/private/<%= @node[:nginx][:ssl_cert_key_name] %>;
+
+  ssl_protocols SSLv3 TLSv1;
+  ssl_ciphers HIGH:!MEDIUM:!LOW:+TLSv1:!SSLv2:+SSLv3:!ADH:!aNULL:!eNULL:!NULL:!EXP:RC4+RSA;
+
+  server_name <%= @node[:nginx][:host_name] %>;
+  
+  auth_basic            "Restricted";
+  auth_basic_user_file  auth/htpasswd;
+  
+  access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/munin-access.log;
+  error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/munin-error.log;
+  
+  location / {
+    root  /var/www/munin;
+  }
+}
