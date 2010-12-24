@@ -218,16 +218,6 @@ if node[:ec2]
   end
 end
 
-if node[:chef][:roles].include?('worker') || node[:chef][:roles].include?('staging')
-  template "/etc/cron.d/fr2_data" do
-    variables :apache_web_dir => node[:apache][:web_dir], 
-              :app_name       => node[:apache][:name], 
-              :rails_env      => node[:rails][:environment],
-              :run_user       => node[:capistrano][:deploy_user]
-    source "cron/fr2_data.erb"
-    mode 0644
-  end
-end
 
 # customize syslog rotation (based on 9.10 rsyslog defaults)
 template "/etc/logrotate.d/rsyslog" do
@@ -255,12 +245,6 @@ file "/var/log/cron/backup.log" do
   only_if do ! File.exists?("/var/log/cron/backup.log") end
 end
 
-if node[:chef][:roles].include?('staging') || node[:chef][:roles].include?('worker')
-  file "/var/log/cron/fr2_data.log" do
-    action :create
-    only_if do ! File.exists?("/var/log/cron/fr2_data.log") end
-  end
-end
 
 ####################################
 #
