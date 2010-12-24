@@ -18,35 +18,36 @@
 # limitations under the License.
 #
 
-%w{ gems.github.com gems.opscode.com rubygems.org}.each do |domain|
+node[:rubygems][:gem_sources].each do |domain|
   execute "gem sources --add http://#{domain}" do
     not_if "gem sources --list | grep #{domain}"
   end
 end
 
-
-###
-# We update rubygems from source to 1.3.6 because currently 
-# chef breaks with 1.3.7 (known issue - rubygems 1.3.7 changes
-# how packages available are parsed for system architectures when 
-# installing gems like mysql that are avail for each architecture)
-###
-
-remote_file "/tmp/rubygems-1.3.6.tgz" do
-  source "http://rubyforge.org/frs/download.php/69365/rubygems-1.3.6.tgz"
-  not_if { ::File.exists?("/tmp/rubygems-1.3.6.tgz") }
-end
-
-bash "Update rubygems to 1.3.6 from source" do
-  cwd "/tmp"
-  code <<-EOH
-  tar zxf rubygems-1.3.6.tgz
-  cd rubygems-1.3.6
-  sudo ruby setup.rb
-  EOH
-  not_if do
-    ::File.exists?("/tmp/rubygems-1.3.6/setup.rb") &&
-    system("gem -v | grep -q '1.3.6'")
+# ruby 1.9.2 comes with rubygems 1.3.7 pre-installed
+case node[:rubygems][:version]
+when '1.3.7'
+  package "rubygems" do
+    action :install
+    not_if { system("gem -v | grep -q '1.3.7'") }
   end
-  ignore_failure true #TODO this isn't respecting 
+when '1.3.6'
+  remote_file "/tmp/rubygems-1.3.6.tgz" do
+    source "http://rubyforge.org/frs/download.php/69365/rubygems-1.3.6.tgz"
+    not_if { ::File.exists?("/tmp/rubygems-1.3.6.tgz") }
+  end
+
+  bash "Update rubygems to 1.3.6 from source" do
+    cwd "/tmp"
+    code <<-EOH
+    tar zxf rubygems-1.3.6.tgz
+    cd rubygems-1.3.6
+    sudo ruby setup.rb
+    EOH
+    not_if do
+      ::File.exists?("/tmp/rubygems-1.3.6/setup.rb") &&
+      system("gem -v | grep -q '1.3.6'")
+    end
+    ignore_failure true #TODO this isn't respecting 
+  end
 end
