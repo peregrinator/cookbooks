@@ -27,26 +27,9 @@ include_recipe "ssh"
 ####################################
 
 # varnish
-package "libpcre3-dev" do
-  action :install
-end
-# nokogiri and calais gems
-package "libxml2-dev" do
-  action :install
-end
-package "libxslt1-dev" do
-  action :install
-end
-
-# patron gem
-package "libcurl4-gnutls-dev" do
-  action :install
-end
-
-# stevedore gem
-package "xpdf" do
-  action :install
-end
+# package "libpcre3-dev" do
+#   action :install
+# end
 
 # used by apache and ngix for creating passwords for basic auth
 package "apache2-utils" do
