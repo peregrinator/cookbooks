@@ -51,98 +51,95 @@ end
 
 ####################################
 #
-# GROUP SETUP
-#
-####################################
-
-group "mysql" do
-  gid 1100
-  not_if "cat /etc/group | grep deploy"
-end
-
-group "deploy" do
-  gid 1002
-  not_if "cat /etc/group | grep deploy"
-end
-
-####################################
-#
-# USER SETUP
+# USER/GROUP SETUP
 #
 ####################################
 
 ### MYSQL ###
-
-user "mysql" do
-  comment "MySQL User"
-  uid "3000"
-  gid "mysql"
-  not_if "cat /etc/password | grep mysql"
-end
-
-### DEPLOY ###
-
-user "deploy" do
-  comment "Deploy User"
-  uid "1002"
-  gid "deploy"
-  home "/home/deploy"
-  shell "/bin/bash"
-  #password "$1$JJsvHslV$szsCjVEroftprNn4JHtDi."
-  not_if do File.directory?("/home/deploy") end
-end
-
-directory "/home/deploy" do
-  owner 'deploy'
-  group 'deploy'
-  mode 0700
-  action :create
-end
-
-directory "/home/deploy/.ssh" do
-  owner 'deploy'
-  group 'deploy'
-  mode 0700
-  recursive true
-  action :create
-  not_if do File.directory?("/home/deploy/.ssh") end
-end
-
-%w(known_hosts).each do |file|
-  remote_file "/home/deploy/.ssh/#{file}" do
-    source "users/deploy/#{file}"
-    owner 'deploy'
-    group 'deploy'
-    mode 0600
-    action :create
-    not_if do File.exists?("/home/deploy/.ssh/#{file}") end
+if node[:ubuntu] && node[:ubuntu][:users] && node[:ubuntu][:users][:mysql]
+  group "mysql" do
+    gid 1100
+    not_if "cat /etc/group | grep deploy"
+  end
+  
+  user "mysql" do
+    comment "MySQL User"
+    uid "3000"
+    gid "mysql"
+    not_if "cat /etc/password | grep mysql"
   end
 end
 
-template "/home/deploy/.ssh/authorized_keys" do
-  source "users/authorized_keys.erb"
-  owner 'deploy'
-  group 'deploy'
-  variables :private_key => node[:ubuntu][:users][:deploy][:authorized_keys]
-  mode 0600
-  action :create
-  not_if do File.exists?("/home/deploy/.ssh/authorized_keys") end
-end
+### DEPLOY ###
+if node[:ubuntu] && node[:ubuntu][:users] && node[:ubuntu][:users][:deploy]
+  group "deploy" do
+    gid 1002
+    not_if "cat /etc/group | grep deploy"
+  end
+  
+  user "deploy" do
+    comment "Deploy User"
+    uid "1002"
+    gid "deploy"
+    home "/home/deploy"
+    shell "/bin/bash"
+    #password "$1$JJsvHslV$szsCjVEroftprNn4JHtDi."
+    not_if do File.directory?("/home/deploy") end
+  end
 
-template "/home/deploy/.ssh/id_rsa" do
-  source "users/id_rsa.erb"
-  owner 'deploy'
-  group 'deploy'
-  variables :private_key => node[:ubuntu][:users][:deploy][:private_key]
-  mode 0600
-  action :create
-  not_if do File.exists?("/home/deploy/.ssh/id_rsa") end
-end
+  directory "/home/deploy" do
+    owner 'deploy'
+    group 'deploy'
+    mode 0700
+    action :create
+  end
 
-# add deploy to sudoers without password required
-execute "add deploy to sudoers" do
-  command "cp /etc/sudoers /etc/sudoers.bak && echo 'deploy  ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers"
-  not_if "cat /etc/sudoers | grep \"deploy  ALL=(ALL) NOPASSWD:ALL\""
+  directory "/home/deploy/.ssh" do
+    owner 'deploy'
+    group 'deploy'
+    mode 0700
+    recursive true
+    action :create
+    not_if do File.directory?("/home/deploy/.ssh") end
+  end
+
+  %w(known_hosts).each do |file|
+    remote_file "/home/deploy/.ssh/#{file}" do
+      source "users/deploy/#{file}"
+      owner 'deploy'
+      group 'deploy'
+      mode 0600
+      action :create
+      not_if do File.exists?("/home/deploy/.ssh/#{file}") end
+    end
+  end
+
+  template "/home/deploy/.ssh/authorized_keys" do
+    source "users/authorized_keys.erb"
+    owner 'deploy'
+    group 'deploy'
+    variables :private_key => node[:ubuntu][:users][:deploy][:authorized_keys]
+    mode 0600
+    action :create
+    not_if do File.exists?("/home/deploy/.ssh/authorized_keys") end
+  end
+
+  template "/home/deploy/.ssh/id_rsa" do
+    source "users/id_rsa.erb"
+    owner 'deploy'
+    group 'deploy'
+    variables :private_key => node[:ubuntu][:users][:deploy][:private_key]
+    mode 0600
+    action :create
+    not_if do File.exists?("/home/deploy/.ssh/id_rsa") end
+  end
+
+  # add deploy to sudoers without password required
+  execute "add deploy to sudoers" do
+    command "cp /etc/sudoers /etc/sudoers.bak && echo 'deploy  ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers"
+    not_if "cat /etc/sudoers | grep \"deploy  ALL=(ALL) NOPASSWD:ALL\""
+  end
+
 end
 
 
