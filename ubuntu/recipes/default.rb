@@ -228,16 +228,29 @@ if node[:ec2]
     to "/mnt/.awssecret"
   end
 
-  # template "/etc/cron.d/ebs_backup" do
-  #     variables :ebs_volume_id => node[:aws][:ebs][:volume_id],
-  #               :mysql_user    => 'root', 
-  #               :mysql_passwd  => node[:mysql][:server_root_password],
-  #               :description   => node[:apache][:name],
-  #               :log           => node[:ubuntu][:backup_log_dir],
-  #               :roles         => node[:chef][:roles]
-  #     source "cron/ebs_backup.erb"
-  #     mode 0644
-  #   end
+  if node[:aws][:ebs][:backup]
+    if node[:mysql]
+      template "/etc/cron.d/ebs_backup" do
+        variables :ebs_volume_id   => node[:aws][:ebs][:database][:volume_id],
+                  :mysql_user      => 'root', 
+                  :mysql_passwd    => node[:mysql][:server_root_password],
+                  :xfs_mount_point => node[:aws][:ebs][:database][:mount_point],
+                  :description     => "ebs-backup-mysql-#{node[:apache][:name]}",
+                  :log             => node[:ubuntu][:backup_log_dir]
+        source "cron/roles/mysql/ebs_backup.erb"
+        mode 0644
+      end
+    else
+      template "/etc/cron.d/ebs_backup" do
+        variables :ebs_volume_id   => node[:aws][:ebs][:worker][:volume_id],
+                  :xfs_mount_point => node[:aws][:ebs][:worker][:mount_point],
+                  :description     => "ebs-backup-#{node[:apache][:name]}",
+                  :log             => node[:ubuntu][:backup_log_dir]
+        source "cron/roles/standard/ebs_backup.erb"
+        mode 0644
+      end
+    end
+  end
   
   execute "Get Amazon private key" do
     cwd "/mnt"
