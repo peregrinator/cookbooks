@@ -47,6 +47,13 @@ http {
   }
   <% end %>
   
+  <%- if @node[:nginx][:unicorn_socket] %>
+  # unicorn master opens a unix domain socket
+  upstream app_server {
+    server unix:<%= @node[:app][:root_dir] %>/tmp/sockets/unicorn.sock;
+  }
+  <%- end %>
+  
   server {
     listen <%= @node[:nginx][:listen_port] %>;
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
