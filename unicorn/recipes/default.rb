@@ -22,3 +22,29 @@ include_recipe "ruby"
 include_recipe "rubygems"
 
 gem_package "unicorn"
+
+template "/etc/init/unicorn.conf" do
+  source "unicorn.upstart.erb"
+end
+
+service "unicorn" do
+  provider Chef::Provider::Service::Upstart
+  supports :status => true, :restart => true, :reload => true
+  action [ :enable, :start ]
+end
+
+directory node[:unicorn][:config_dir] do
+  recursive true
+  action :create
+end
+
+template node[:unicorn][:config] do
+  source "unicorn.rb.erb"
+  cookbook "unicorn"
+  mode "0644"
+  owner node[:unicorn][:owner]
+  group node[:unicorn][:group]
+  notifies :restart, resources(:service => "unicorn")
+end
+
+

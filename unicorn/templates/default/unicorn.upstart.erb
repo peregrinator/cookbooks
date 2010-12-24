@@ -1,0 +1,19 @@
+description "Starts and stops unicorn process"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+expect daemon
+respawn
+
+env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+pre-start script
+  mkdir -p <%= @node[:unicorn][:pid_dir] %>
+end script
+
+exec unicorn --config-file <%= @node[:unicorn][:config] %> --env <%= @node[:rails][:env] %> --daemonize
+
+post-stop script
+  pkill unicorn
+end script
