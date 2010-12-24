@@ -1,11 +1,9 @@
 127.0.0.1 localhost
 
-# auto generated for fr2 internal usage
-<%= @proxy_server_ip  %> <%= @proxy_server_fqdn  %> <%= @proxy_server_alias  %>
-<%= @static_server_ip %> <%= @static_server_fqdn %> <%= @static_server_alias %>
-<%= @worker_server_ip %> <%= @worker_server_fqdn %> <%= @worker_server_alias %>
-<%= @database_ip      %> <%= @database_fqdn      %> <%= @database_alias      %>
-<%= @sphinx_ip        %> <%= @sphinx_fqdn        %> <%= @sphinx_alias        %>
+# auto generated for internal usage
+<% node[:ubuntu][:servers].each do |server| %>
+  <%= server[:ip] %> <%= server[:fqdn] %> <%= server[:alias] %>
+<% end %>
 
 
 # The following lines are desirable for IPv6 capable hosts
