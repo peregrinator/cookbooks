@@ -17,47 +17,8 @@
 # limitations under the License.
 #
 
-#include_recipe "apt"
-
-####################################
-#
-# Add our apt sources
-#
-####################################
-
-if node[:ec2]
-  template "/etc/apt/sources.list" do
-    mode 0644
-    variables :code_name => node[:lsb][:codename], :ec2_region => node[:lsb][:ec2_region]
-    notifies :run, resources(:execute => "apt-get update"), :immediately
-    source "apt/sources.list.erb"
-  end
-
-  # ec2-consistent-snapshot lives here...
-  template "/etc/apt/sources.list.d/alestic-ppa.list" do
-    mode 0644
-    variables :code_name => node[:lsb][:codename]
-    notifies :run, resources(:execute => "apt-get update"), :immediately
-    source "apt/alestic-ppa.list.erb"
-  end
-  execute "add apt signature keys for alestic ppa" do
-    command "apt-key adv --keyserver keys.gnupg.net --recv-keys BE09C571"
-    user 'root'
-  end
-  
-  # xfs file system tools (for EBS volumes)
-  package 'xfsprogs' do
-    action :install
-  end
-end
-
-# 10-gen source for MongoDB
-template "/etc/apt/sources.list.d/mongo.list" do
-  mode 0644
-  variables :ubuntu_version => node[:platform_version]
-  notifies :run, resources(:execute => "apt-get update"), :immediately
-  source "apt/mongo.list.erb"
-end
+include_recipe "apt"
+include_recipe "ssh"
 
 ####################################
 #

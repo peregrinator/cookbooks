@@ -17,6 +17,28 @@
 # limitations under the License.
 #
 
+
+####################################
+#
+# Add our apt sources
+#
+####################################
+
+if node[:ec2]
+  include_recipe "apt:ec2"
+end
+
+# 10-gen source for MongoDB
+if node[:mongo]
+  template "/etc/apt/sources.list.d/mongo.list" do
+    mode 0644
+    variables :ubuntu_version => node[:platform_version]
+    notifies :run, resources(:execute => "apt-get update"), :immediately
+    source "apt/mongo.list.erb"
+  end
+end
+
+
 e = execute "apt-get update" do
   action :nothing
 end
