@@ -50,7 +50,7 @@ when '1.8'
     end
   end
 when '1.9'
-  remote_file 'tmp/ruby-1.9.2-p0.tar.gz' do
+  remote_file '/tmp/ruby-1.9.2-p0.tar.gz' do
     source 'ftp://ftp.ruby-lang.org//pub/ruby/1.9/ruby-1.9.2-p0.tar.gz'
     not_if { ::File.exists?("/tmp/ruby-1.9.2-p0.tar.gz") || 
              (::File.exists?("/usr/local/bin/ruby") &&
