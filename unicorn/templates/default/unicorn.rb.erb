@@ -24,8 +24,10 @@ timeout <%= @node[:unicorn][:worker_timeout] %>
 # listen 8080, :tcp_nopush => true
 
 # What ports/sockets to listen on, and what options for them.
-<%- @node[:unicorn][:listen].each do |port, options| %>
-listen <%= port %>, <%= options %>
+<%- if @node[:unicorn][:listen][:type] == 'tcp' %>
+listen <%= @node[:unicorn][:listen][:address] %>, :tcp_nopush => <%= @node[:unicorn][:listen][:tcp_nopush] %>
+<%- elsif @node[:unicorn][:listen][:type] == 'socket' %>
+listen <%= @node[:unicorn][:listen][:address] %>, :backlog => <%= @node[:unicorn][:listen][:backlog] %>
 <%- end %>
 
 

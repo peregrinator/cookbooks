@@ -1,10 +1,10 @@
 default_unless[:unicorn][:config] = "#{node[:app][:root_dir]}/config/unicorn.rb"
 default_unless[:unicorn][:listen] = 'tcp'
 
-if node[:unicorn][:listen] == 'tcp'
+if node[:unicorn][:listen][:type] == 'tcp'
   default_unless[:unicorn][:listen][:address]    = 8080
   default_unless[:unicorn][:listen][:tcp_nopush] = true
-elsif node[:unicorn][:listen] == 'socket'
+elsif node[:unicorn][:listen][:type] == 'socket'
   default_unless[:unicorn][:listen][:address] = "#{node[:app][:root_dir]}/tmp/sockets/unicorn.sock"
   default_unless[:unicorn][:listen][:backlog] = 1024
 end
