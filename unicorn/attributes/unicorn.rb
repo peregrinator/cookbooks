@@ -1,5 +1,6 @@
-default_unless[:unicorn][:config] = "#{node[:app][:root_dir]}/config/unicorn.rb"
-default_unless[:unicorn][:listen] = 'tcp'
+default_unless[:unicorn][:config_dir] = "#{node[:app][:root_dir]}/config"
+default_unless[:unicorn][:config]     = "#{node[:unicorn][:config_dir]}/unicorn.rb"
+default_unless[:unicorn][:listen]     = 'tcp'
 
 if node[:unicorn][:listen][:type] == 'tcp'
   default_unless[:unicorn][:listen][:address]    = 8080
@@ -22,6 +23,7 @@ default_unless[:unicorn][:stdout_log] = "#{node[:app][:root_dir]}/log/unicorn.st
 default_unless[:unicorn][:preload_app]
 default_unless[:unicorn][:before_fork]
 default_unless[:unicorn][:after_fork]
+
 
 # only created in config file if the ruby version supports
 # copy on write (ie REE)
