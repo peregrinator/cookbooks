@@ -2,7 +2,7 @@
 
 # auto generated for internal usage
 <% node[:ubuntu][:servers].each do |server| %>
-  <%= server[:ip] %> <%= server[:fqdn] %> <%= server[:alias] %>
+<%= server[:ip] %> <%= server[:fqdn] %> <%= server[:alias] %>
 <% end %>
 
 

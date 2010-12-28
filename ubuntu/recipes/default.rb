@@ -260,3 +260,8 @@ template "/etc/hosts" do
   source "etc_hosts.erb"
   mode 0644
 end
+
+template "/etc/hostname" do
+  source "etc_hostname.erb"
+  mode 0644
+end
