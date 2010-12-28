@@ -34,7 +34,7 @@ end
 
 case node[:rails][:db_adapter]
 when 'mysql'
-  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/config/database.yml" do
+  template "#{node[:app][:root_dir]}/config/database.yml" do
     variables :environment   => node[:rails][:environment],
               :host          => node[:ubuntu][:database][:fqdn], 
               :port          => node[:mysql][:server_port],
@@ -44,7 +44,7 @@ when 'mysql'
     mode 0644
   end
 when 'mongoid'
-  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/config/mongoid.yml" do
+  template "#{node[:app][:root_dir]}/config/mongoid.yml" do
     variables :environment   => node[:rails][:environment],
               :host          => node[:mongodb][:bind_address], 
               :port          => node[:mongodb][:port],
@@ -58,7 +58,7 @@ end
 
 node[:rails][:aws_config_files].each do |file|
   execute "Get private config file #{file}" do
-    cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
+    cwd "#{node[:app][:root_dir]}/config"
     command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:#{file} #{file}"
     user "#{node[:capistrano][:deploy_user]}"
     group "#{node[:capistrano][:deploy_user]}"
