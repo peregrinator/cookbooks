@@ -38,9 +38,20 @@ directory node[:unicorn][:config_dir] do
   action :create
 end
 
+group "#{node[:app][:app_name]}" do
+  gid 1200
+  not_if "cat /etc/group | grep #{node[:app][:app_name]}"
+end
+
+user "#{node[:app][:app_name]}" do
+  comment "#{node[:app][:app_name]} User"
+  uid "4000"
+  gid "#{node[:app][:app_name]}"
+  not_if "cat /etc/password | grep #{node[:app][:app_name]}"
+end
+
 template node[:unicorn][:config] do
   source "unicorn.rb.erb"
-  cookbook "unicorn"
   mode "0644"
   owner node[:unicorn][:owner]
   group node[:unicorn][:group]
