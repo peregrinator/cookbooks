@@ -59,9 +59,9 @@ http {
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
     
     # rewrite non-www to www
-    if ( $host = '<%= @node[:nginx][:host_name] %>' ) {
-      rewrite ^(.*)$ http://www.<%= @node[:nginx][:host_name] %>$1; # $1 contains '/foo', not 'mydomain.com/foo'
-    }
+    # if ( $host = '<%= @node[:nginx][:host_name] %>' ) {
+    #   rewrite ^(.*)$ http://www.<%= @node[:nginx][:host_name] %>$1; # $1 contains '/foo', not 'mydomain.com/foo'
+    # }
     
     access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/access.log;
     error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/error.log;
@@ -108,15 +108,7 @@ http {
     <% end %>
     
     location / {
-      <% if @node[:nginx][:varnish_proxy] %>
-      # ofr redirects for old pages
-      rewrite  /inspection.aspx        http://www.ofr.gov/inspection.aspx        permanent;
-      rewrite  /Privacy/AGENCIES.aspx  http://www.ofr.gov/Privacy/AGENCIES.aspx  permanent;
-      rewrite  /Catalog.aspx           http://www.ofr.gov/Catalog.aspx           permanent;
-      rewrite  /AboutUs.aspx           http://www.ofr.gov/AboutUs.aspx           permanent;
-      rewrite  /ContactUs.aspx         http://www.ofr.gov/ContactUs.aspx         permanent;
-      <% end %>
-      
+      root <%= @node[:nginx][:doc_root] %>;
       client_max_body_size <%= @node[:nginx][:client_max_body_size] %>;
       
       
@@ -176,7 +168,7 @@ http {
     <% end %>
   }
   
-  <% @node[:nginx][:ssl_enabled] %>
+  <% if @node[:nginx][:ssl_enabled] %>
   server {
     listen   443;
     ssl on;
