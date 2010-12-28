@@ -37,6 +37,10 @@ end
   end
 end
 
+service "nginx" do
+  supports :status => true, :restart => true, :reload => true
+  action [ :enable, :start ]
+end
 
 template "nginx.conf" do
   path "#{node[:nginx][:dir]}/nginx.conf"
@@ -44,6 +48,7 @@ template "nginx.conf" do
   owner "root"
   group "root"
   mode 0644
+  notifies :restart, resources(:service => 'nginx')
 end
 
 directory "#{node[:nginx][:dir]}/conf.d" do
@@ -51,6 +56,7 @@ directory "#{node[:nginx][:dir]}/conf.d" do
   owner node[:nginx][:user]
   action :create
   recursive true
+  notifies :restart, resources(:service => 'nginx')
 end
 
 directory "#{node[:nginx][:dir]}/sites-enabled" do
@@ -58,6 +64,7 @@ directory "#{node[:nginx][:dir]}/sites-enabled" do
   owner node[:nginx][:user]
   action :create
   recursive true
+  notifies :restart, resources(:service => 'nginx')
 end
 
 # add location for varnish errors if it happens to go down
@@ -87,9 +94,4 @@ if node[:chef][:roles].include?('proxy')
     cwd "/var/www/apps/fr2/current/public/nginx"
     command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:images/logotype.png logotype.png"
   end
-end
-
-service "nginx" do
-  supports :status => true, :restart => true, :reload => true
-  action [ :enable, :start ]
 end
