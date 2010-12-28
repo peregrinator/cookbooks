@@ -28,7 +28,7 @@ service "ssh" do
   action [ :enable, :start ]
 end
 
-remote_file "/etc/ssh/ssh_config" do
+cookbook_file "/etc/ssh/ssh_config" do
   source "ssh/ssh_config"
   owner "root"
   group "root"
