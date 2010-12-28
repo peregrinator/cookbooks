@@ -52,9 +52,7 @@ when '1.8'
 when '1.9'
   remote_file '/tmp/ruby-1.9.2-p136.tar.gz' do
     source 'http://ftp.ruby-lang.org//pub/ruby/1.9/ruby-1.9.2-p136.tar.gz'
-    not_if { ::File.exists?("/tmp/ruby-1.9.2-p136.tar.gz") || 
-              system("/usr/local/bin/ruby -v | grep -q '1.9.2p136$'")
-           }
+    not_if { system("/usr/local/bin/ruby -v | grep -q '1.9.2p136'") || ::File.exists?("/tmp/ruby-1.9.2-p136.tar.gz") }
   end
   
   bash "Install Ruby 1.9.2p136 from source" do
@@ -67,9 +65,6 @@ when '1.9'
     make install
     EOH
 
-    not_if do
-      ::File.exists?("/usr/local/bin/ruby") &&
-      system("/usr/local/bin/ruby -v | grep -q '1.9.2p136$'")
-    end
+    not_if { system("/usr/local/bin/ruby -v | grep -q '1.9.2p136'") }
   end
 end
