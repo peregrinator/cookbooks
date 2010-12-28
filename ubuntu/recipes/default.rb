@@ -36,6 +36,10 @@ package "apache2-utils" do
   action :install
 end
 
+package "vim" do
+  action :install
+end
+
 if node[:ec2]
   # used for backups on ec2
   package "ec2-consistent-snapshot" do
@@ -59,7 +63,7 @@ end
 if node[:ubuntu] && node[:ubuntu][:users] && node[:ubuntu][:users][:mysql]
   group "mysql" do
     gid 1100
-    not_if "cat /etc/group | grep deploy"
+    not_if "cat /etc/group | grep mysql"
   end
   
   user "mysql" do
