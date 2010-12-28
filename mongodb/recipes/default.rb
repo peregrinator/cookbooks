@@ -46,6 +46,10 @@ bash "install-mongodb" do
 end
 
 
+%w(bsondump mongod mongoexport mongoimport mongos mongostat mongo mongodump mongofiles mongorestore mongosniff).each do |binary|
+  link "/usr/local/bin/#{binary}" do
+    to "/usr/local/mongodb/bin/#{binary}"
+  end
 end
 
 # create config directory and file
