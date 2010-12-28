@@ -69,25 +69,29 @@ gem_package "bundler" do
   version "1.0.0"
 end
 
-link "/usr/bin/bundle" do
-  to "#{node[:ruby_enterprise][:install_path]}/bin/bundle"
+if node[:ruby][:version] == 'ree'
+  link "/usr/bin/bundle" do
+    to "#{node[:ruby_enterprise][:install_path]}/bin/bundle"
+  end
 end
 
-execute "bundle install" do
-  command "bundle install --deployment --gemfile #{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/Gemfile --without development test"
-  user "#{node[:capistrano][:deploy_user]}"
-  group "#{node[:capistrano][:deploy_user]}"
-  action :nothing
-end
- 
-%w(Gemfile Gemfile.lock).each do |f|
-  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/#{f}" do
-    source "#{f}"
-    notifies :run, resources(:execute => "bundle install")
-  end
-  
-  file "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/#{f}" do
-    owner "#{node[:capistrano][:deploy_user]}"
+if node[:rails][:env] == 'production'
+  execute "bundle install" do
+    command "bundle install --deployment --gemfile #{node[:app][:root_dir]}/Gemfile --without development test"
+    user "#{node[:capistrano][:deploy_user]}"
     group "#{node[:capistrano][:deploy_user]}"
+    action :nothing
+  end
+ 
+  %w(Gemfile Gemfile.lock).each do |f|
+    template "#{node[:app][:root_dir]}/#{f}" do
+      source "#{f}"
+      notifies :run, resources(:execute => "bundle install")
+    end
+  
+    file "#{node[:app][:root_dir]}/#{f}" do
+      owner "#{node[:capistrano][:deploy_user]}"
+      group "#{node[:capistrano][:deploy_user]}"
+    end
   end
 end
