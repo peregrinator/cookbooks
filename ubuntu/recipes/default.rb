@@ -40,6 +40,14 @@ package "vim" do
   action :install
 end
 
+# nokogiri and calais gems
+package "libxml2-dev" do
+  action :install
+end
+package "libxslt1-dev" do
+  action :install
+end
+
 if node[:ec2]
   # used for backups on ec2
   package "ec2-consistent-snapshot" do
