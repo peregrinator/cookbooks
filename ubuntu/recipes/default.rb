@@ -40,7 +40,7 @@ package "vim" do
   action :install
 end
 
-# nokogiri and calais gems
+# nokogiri
 package "libxml2-dev" do
   action :install
 end

@@ -10,7 +10,7 @@ worker_processes <%= @node[:unicorn][:worker_processes] %>
 
 # Help ensure your application will always spawn in the symlinked
 # "current" directory that Capistrano sets up.
-working_directory <%= @node[:unicorn][:working_directory] %> # available in 0.94.0+
+working_directory '<%= @node[:unicorn][:working_directory] %>' # available in 0.94.0+
 
 # What the timeout for killing busy workers is, in seconds
 timeout <%= @node[:unicorn][:worker_timeout] %>
@@ -27,18 +27,18 @@ timeout <%= @node[:unicorn][:worker_timeout] %>
 <%- if @node[:unicorn][:listen][:type] == 'tcp' %>
 listen <%= @node[:unicorn][:listen][:address] %>, :tcp_nopush => <%= @node[:unicorn][:listen][:tcp_nopush] %>
 <%- elsif @node[:unicorn][:listen][:type] == 'socket' %>
-listen <%= @node[:unicorn][:listen][:address] %>, :backlog => <%= @node[:unicorn][:listen][:backlog] %>
+listen '<%= @node[:unicorn][:listen][:address] %>', :backlog => <%= @node[:unicorn][:listen][:backlog] %>
 <%- end %>
 
 
 # feel free to point this anywhere accessible on the filesystem
-pid <%= @node[:unicorn][:pid] %>
+pid '<%= @node[:unicorn][:pid] %>'
 
 # By default, the Unicorn logger will write to stderr.
 # Additionally, ome applications/frameworks log to stderr or stdout,
 # so prevent them from going to /dev/null when daemonized here:
-stderr_path <%= @node[:unicorn][:stderr_log] %>
-stdout_path <%= @node[:unicorn][:stdout_log] %>
+stderr_path '<%= @node[:unicorn][:stderr_log] %>'
+stdout_path '<%= @node[:unicorn][:stdout_log] %>'
 
 # Whether the app should be pre-loaded
 # If you're doing this make sure your forked db connections
@@ -69,7 +69,7 @@ before_fork do |server, worker|
   #
   # Using this method we get 0 downtime deploys.
 
-  old_pid = <%= @node[:unicorn][:pid] %> + '.oldbin'
+  old_pid = '<%= @node[:unicorn][:pid] %>' + '.oldbin'
   if File.exists?(old_pid) && server.pid != old_pid
     begin
       Process.kill("QUIT", File.read(old_pid).to_i)
