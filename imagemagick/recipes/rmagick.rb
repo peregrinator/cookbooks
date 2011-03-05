@@ -23,6 +23,7 @@ when "redhat", "centos", "fedora"
   package "ImageMagick-devel"
 when "debian", "ubuntu"
   package "libmagickwand-dev"
+  package "html2ps"
 end
 
 gem_package "rmagick"
