@@ -38,7 +38,7 @@ bash "install-mongodb" do
   cwd "/tmp"
   code <<-EOH
     tar zxvf #{node[:mongodb][:file_name]}.tgz
-    mv -f #{node[:mongodb][:file_name]} #{node[:mongodb][:root]}
+    mv -f #{node[:mongodb][:file_name]}/ #{node[:mongodb][:root]}
   EOH
   not_if { ::File.exists?('/usr/local/bin/mongod') &&
            system("/usr/local/bin/mongod -v | grep -q '#{node[:mongodb][:version]}'") 

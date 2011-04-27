@@ -1,0 +1,118 @@
+# by chef for firkinapp.com
+
+# user <%= @node[:nginx][:user] %>;
+worker_processes  <%= @node[:nginx][:worker_processes] %>;
+
+<% if @node[:nginx][:daemon_disable] -%>
+daemon off;
+<% end -%>
+
+error_log  <%= @node[:nginx][:log_dir] %>/error.log;
+pid        /var/run/nginx.pid;
+
+events {
+  worker_connections  <%= @node[:nginx][:worker_connections] %>;
+  # more efficient on linux
+  use epoll;
+}
+
+http {
+  include       <%= @node[:nginx][:dir] %>/mime.types;
+  default_type  application/octet-stream;
+
+  access_log	<%= @node[:nginx][:log_dir] %>/access.log combined;
+
+  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay off;
+
+  gzip  <%= @node[:nginx][:gzip] %>;
+  <% if @node[:nginx][:gzip] == "on" %>
+  gzip_http_version <%= @node[:nginx][:gzip_http_version] %>;
+  gzip_comp_level <%= @node[:nginx][:gzip_comp_level] %>;
+  gzip_proxied <%= @node[:nginx][:gzip_proxied] %>;
+  gzip_buffers <%= @node[:nginx][:gzip_buffers] %>;
+  gzip_min_length <%= @node[:nginx][:gzip_min_length] %>;
+  gzip_types <%= @node[:nginx][:gzip_types].join(' ') %>;
+  gzip_disable "MSIE [1-6]\.";
+  <% end %>
+
+  server_names_hash_bucket_size <%= @node[:nginx][:server_names_hash_bucket_size] %>;
+  
+  <%- if @node[:nginx][:unicorn_socket] %>
+  # unicorn master opens a unix domain socket
+  upstream app_server {
+    # fail_timeout=0 means we always retry an upstream even if it failed
+    # to return a good HTTP response (in case the Unicorn master nukes a
+    # single worker for timing out).
+    
+    server unix:/tmp/sockets/<%= @node[:app][:app_name] %>_unicorn.sock fail_timeout=0;
+  }
+  <%- end %>
+  
+  server {
+    listen <%= @node[:nginx][:listen_port] %> default deferred;
+    server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
+    
+    # rewrite non-www to www
+    # if ( $host = '<%= @node[:nginx][:host_name] %>' ) {
+    #   rewrite ^(.*)$ http://www.<%= @node[:nginx][:host_name] %>$1; # $1 contains '/foo', not 'mydomain.com/foo'
+    # }
+    
+    <% if @node[:nginx][:keepalive] == "on" %>
+    keepalive_timeout  <%= @node[:nginx][:keepalive_timeout] %>;
+    <% end %>
+    
+    access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/access.log;
+    error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/error.log;
+
+    <% if @node[:nginx][:ssl_enabled] %>
+    # rewrite admin calls to https
+    location /admin {
+      rewrite  ^/(admin($|/.*))  https://<%= @node[:nginx][:host_name] %>/$1  permanent;
+    }
+    <% end %>
+  
+    root <%= @node[:nginx][:doc_root] %>;
+    try_files $uri/index.html $uri.html $uri @app;
+    
+    client_max_body_size <%= @node[:nginx][:client_max_body_size] %>;
+    
+    location @app {
+      
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      
+      # pass the Host: header from the client right along so redirects
+      # can be set properly within the Rack application
+      proxy_set_header Host $http_host;
+      
+      # we don't want nginx trying to do something clever with
+      # redirects, we set the Host: header above already.
+      proxy_redirect off;
+      
+      <%- if @node[:nginx][:unicorn_socket] -%>
+        # set cache control
+        expires 5m;
+
+        proxy_pass             http://app_server;
+        proxy_set_header       X-Real-IP $remote_addr;
+        proxy_set_header       X-Client-Verify SUCCESS;
+        proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
+        proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+        proxy_intercept_errors on;
+      <%- end -%>
+      
+    }
+    
+    <% if @node[:rails][:environment] == 'production'%>
+    # Rails error pages
+    error_page 500 502 503 504 /500.html;
+    location = /500.html {
+      root <%= @node[:nginx][:doc_root] %>;
+    }
+    <% end %>
+  }
+  
+  include <%= @node[:nginx][:dir] %>/conf.d/*.conf;
+  include <%= @node[:nginx][:dir] %>/sites-enabled/*;
+}
