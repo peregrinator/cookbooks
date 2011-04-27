@@ -12,7 +12,7 @@ pre-start script
   mkdir -p <%= @node[:unicorn][:pid_dir] %>
 end script
 
-exec unicorn --config-file <%= @node[:unicorn][:config] %> --env <%= @node[:rails][:env] %> --daemonize
+exec unicorn --config-file <%= @node[:unicorn][:config] %> --env <%= @node[:rails][:environment] %> --daemonize
 
 post-stop script
   pkill unicorn
