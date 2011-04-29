@@ -29,7 +29,7 @@ remote_file "/tmp/#{node[:mongodb][:file_name]}.tgz" do
   not_if do
     ::File.exists?("/tmp/#{node[:mongodb][:file_name]}.tgz") || 
     ( ::File.exists?('/usr/local/bin/mongod') &&
-      system("/usr/local/bin/mongod -v | grep -q '#{node[:mongodb][:version]}'")
+      system("/usr/local/bin/mongod --version | grep -q '#{node[:mongodb][:version]}'")
     )
   end
 end
@@ -41,7 +41,7 @@ bash "install-mongodb" do
     mv -f #{node[:mongodb][:file_name]}/ #{node[:mongodb][:root]}
   EOH
   not_if { ::File.exists?('/usr/local/bin/mongod') &&
-           system("/usr/local/bin/mongod -v | grep -q '#{node[:mongodb][:version]}'") 
+           system("/usr/local/bin/mongod --version | grep -q '#{node[:mongodb][:version]}'") 
          }
 end
 
