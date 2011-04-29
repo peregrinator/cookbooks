@@ -55,7 +55,7 @@ template node[:unicorn][:config] do
   mode "0644"
   owner node[:unicorn][:owner]
   group node[:unicorn][:group]
-  notifies :restart, resources(:service => "unicorn")
+  #notifies :restart, resources(:service => "unicorn")
 end
 
 

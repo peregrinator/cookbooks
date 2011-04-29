@@ -26,6 +26,10 @@ http {
   tcp_nopush on;
   tcp_nodelay off;
 
+  <% if @node[:nginx][:keepalive] == "on" %>
+  keepalive_timeout  <%= @node[:nginx][:keepalive_timeout] %>;
+  <% end %>
+
   gzip  <%= @node[:nginx][:gzip] %>;
   <% if @node[:nginx][:gzip] == "on" %>
   gzip_http_version <%= @node[:nginx][:gzip_http_version] %>;

@@ -1,3 +1,5 @@
+# by chef for krakenapp.com
+
 # user <%= @node[:nginx][:user] %>;
 worker_processes  <%= @node[:nginx][:worker_processes] %>;
 
@@ -40,22 +42,19 @@ http {
   <% end %>
 
   server_names_hash_bucket_size <%= @node[:nginx][:server_names_hash_bucket_size] %>;
-  
-  <% if @node[:nginx][:varnish_proxy] %>
-  upstream varnish {
-    server <%= @node[:nginx][:varnish_proxy_host] %>:<%= @node[:varnish][:listen_port] %> weight=<%= @node[:nginx][:varnish_weight] %> max_fails=<%= @node[:nginx][:varnish_max_fails] %> fail_timeout=<%= @node[:nginx][:varnish_fail_timeout] %>;
-  }
-  <% end %>
-  
+    
   <%- if @node[:nginx][:unicorn_socket] %>
-  # unicorn master opens a unix domain socket
   upstream app_server {
-    server unix:/tmp/sockets/<%= @node[:app][:app_name] %>_unicorn.sock;
+    # fail_timeout=0 means we always retry an upstream even if it failed
+    # to return a good HTTP response (in case the Unicorn master nukes a
+    # single worker for timing out).
+    
+    server unix:/tmp/sockets/<%= @node[:app][:app_name] %>_unicorn.sock fail_timeout=0;
   }
   <%- end %>
   
   server {
-    listen <%= @node[:nginx][:listen_port] %>;
+    listen <%= @node[:nginx][:listen_port] %> default deferred;
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
     
     # rewrite non-www to www

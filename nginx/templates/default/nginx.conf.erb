@@ -24,10 +24,6 @@ http {
   tcp_nopush on;
   tcp_nodelay on;
 
-  <% if @node[:nginx][:keepalive] == "on" %>
-  keepalive_timeout  <%= @node[:nginx][:keepalive_timeout] %>;
-  <% end %>
-
   gzip  <%= @node[:nginx][:gzip] %>;
   <% if @node[:nginx][:gzip] == "on" %>
   gzip_http_version <%= @node[:nginx][:gzip_http_version] %>;
@@ -40,204 +36,81 @@ http {
   <% end %>
 
   server_names_hash_bucket_size <%= @node[:nginx][:server_names_hash_bucket_size] %>;
-  
-  <% if @node[:nginx][:varnish_proxy] %>
-  upstream varnish {
-    server <%= @node[:nginx][:varnish_proxy_host] %>:<%= @node[:varnish][:listen_port] %> weight=<%= @node[:nginx][:varnish_weight] %> max_fails=<%= @node[:nginx][:varnish_max_fails] %> fail_timeout=<%= @node[:nginx][:varnish_fail_timeout] %>;
-  }
-  <% end %>
-  
+    
   <%- if @node[:nginx][:unicorn_socket] %>
-  # unicorn master opens a unix domain socket
   upstream app_server {
-    server unix:<%= @node[:app][:root_dir] %>/tmp/sockets/unicorn.sock;
+    # fail_timeout=0 means we always retry an upstream even if it failed
+    # to return a good HTTP response (in case the Unicorn master nukes a
+    # single worker for timing out).
+    
+    server unix:/tmp/sockets/<%= @node[:app][:app_name] %>_unicorn.sock fail_timeout=0;
   }
   <%- end %>
   
   server {
-    listen <%= @node[:nginx][:listen_port] %>;
+    listen <%= @node[:nginx][:listen_port] %> default deferred;
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
     
-    if ( $host = '<%= @node[:nginx][:host_name] %>' ) {
-      # rewrite ^(.*)$ http://www.ofr.gov$1; #someone fat fingered the dns...
-      rewrite ^(.*)$ http://www.<%= @node[:nginx][:host_name] %>$1; # $1 contains '/foo', not 'mydomain.com/foo'
-    }
-    
-    # if ( $host = 'www.federalregister.gov' ) {
-    #   rewrite ^(.*)$ http://www.ofr.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
+    # rewrite non-www to www
+    # if ( $host = '<%= @node[:nginx][:host_name] %>' ) {
+    #   rewrite ^(.*)$ http://www.<%= @node[:nginx][:host_name] %>$1; # $1 contains '/foo', not 'mydomain.com/foo'
     # }
-    
+
+    <% if @node[:nginx][:keepalive] == "on" %>
+    keepalive_timeout  <%= @node[:nginx][:keepalive_timeout] %>;
+    <% end %>
+
     access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/access.log;
     error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/error.log;
 
-    <% if @node[:nginx][:varnish_proxy] %>
+    <% if @node[:nginx][:ssl_enabled] %>
+    # rewrite admin calls to https
     location /admin {
       rewrite  ^/(admin($|/.*))  https://<%= @node[:nginx][:host_name] %>/$1  permanent;
     }
     <% end %>
     
-    location /nginx {
-      root  <%= @node[:nginx][:doc_root] %>;
-    }
+    root <%= @node[:nginx][:doc_root] %>;
+    try_files $uri/index.html $uri.html $uri @app;
     
-    <% if @node[:nginx][:varnish_proxy] %>
-    location ~* ^/sitemap {
-       expires 0s;
-       
-       proxy_pass             http://varnish;
-       proxy_redirect         http://varnish/ http://$host:$server_port/;
-       proxy_set_header       Host $host;
-       proxy_set_header       X-Real-IP $remote_addr;
-       proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
-       proxy_set_header       X-Client-Verify SUCCESS;
-       proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
-       proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
-       proxy_intercept_errors on;
-    }
+    client_max_body_size <%= @node[:nginx][:client_max_body_size] %>;
     
-    location ~* ^(/images|/javascripts|/stylesheets) {
-       expires 1y;
-       
-       proxy_pass             http://varnish;
-       proxy_redirect         http://varnish/ http://$host:$server_port/;
-       proxy_set_header       Host $host;
-       proxy_set_header       X-Real-IP $remote_addr;
-       proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
-       proxy_set_header       X-Client-Verify SUCCESS;
-       proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
-       proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
-       proxy_intercept_errors on;
-    }
-    <% end %>
-    
-    location / {
-      <% if @node[:nginx][:varnish_proxy] %>
-      # ofr redirects for old pages
-      rewrite  /inspection.aspx        http://www.ofr.gov/inspection.aspx        permanent;
-      rewrite  /Privacy/AGENCIES.aspx  http://www.ofr.gov/Privacy/AGENCIES.aspx  permanent;
-      rewrite  /Catalog.aspx           http://www.ofr.gov/Catalog.aspx           permanent;
-      rewrite  /AboutUs.aspx           http://www.ofr.gov/AboutUs.aspx           permanent;
-      rewrite  /ContactUs.aspx         http://www.ofr.gov/ContactUs.aspx         permanent;
-      <% end %>
+    location @app {
       
-      client_max_body_size <%= @node[:nginx][:client_max_body_size] %>;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       
+      # pass the Host: header from the client right along so redirects
+      # can be set properly within the Rack application
+      proxy_set_header Host $http_host;
       
-      <% if @node[:nginx][:varnish_proxy] %>
-      # auth_basic            "Restricted";
-      # auth_basic_user_file  auth/htpasswd;
+      # we don't want nginx trying to do something clever with
+      # redirects, we set the Host: header above already.
+      proxy_redirect off;
+      
+      <%- if @node[:nginx][:unicorn_socket] -%>
+        # set cache control
+        expires 5m;
 
-      # set cache control
-      expires 5m;
-
-      proxy_pass             http://varnish;
-      proxy_redirect         http://varnish/ http://$host:$server_port/;
-      proxy_set_header       Host $host;
-      proxy_set_header       X-Real-IP $remote_addr;
-      proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header       X-Client-Verify SUCCESS;
-      proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
-      proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
-      proxy_intercept_errors on;
-      <% elsif @node[:chef][:roles].include?('static') %>
+        proxy_pass             http://app_server;
+        proxy_set_header       X-Real-IP $remote_addr;
+        proxy_set_header       X-Client-Verify SUCCESS;
+        proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
+        proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+        proxy_intercept_errors on;
+      <%- end -%>
       
-      # set cache control
-      expires 1y;
-      
-      # mark these as public so they get cached on SSL connections in FF
-      # see http://blog.pluron.com/2008/07/why-you-should.html
-      add_header Cache-Control public;
-      
-      # doc root
+    }
+    
+    <% if @node[:rails][:environment] == 'production'%>
+    # Rails error pages
+    error_page 500 502 503 504 /500.html;
+    location = /500.html {
       root <%= @node[:nginx][:doc_root] %>;
-      
-      # If the file exists as a static file serve it directly without
-      # running all the other rewrite tests on it
-      if (-f $request_filename) { 
-        break; 
-      }
-      <% end %>      
     }
-    
-    <% if @node[:chef][:roles].include?('proxy') %>
-      error_page 502 503 /502_503_proxy.html;  
-      location = /502_503_proxy.html {  
-          root  <%= @node[:nginx][:doc_root] %>;  
-      }
-    <% end %>
-    
-    
-    <% if @node[:chef][:roles].include?('static') %>
-      error_page 500  /500_static.html;  
-      location = /500_static.html {  
-          root  <%= @node[:nginx][:doc_root] %>;  
-      }
-      error_page 404  /404_static.html;  
-      location = /404_static.html {  
-          root  <%= @node[:nginx][:doc_root] %>;  
-      }
     <% end %>
   }
-  
-  <% if @node[:nginx][:varnish_proxy] %>
-  server {
-    listen   443;
-    ssl on;
-    ssl_certificate /etc/ssl/certs/<%= @node[:nginx][:ssl_cert_name] %>;
-    ssl_certificate_key /etc/ssl/private/<%= @node[:nginx][:ssl_cert_key_name] %>;
-    
-    ssl_protocols SSLv3 TLSv1;
-    ssl_ciphers HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3:!ADH:!aNULL:!eNULL:!NULL:!LOW:!EXP:RC4+RSA;
-    
-    server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
-    
-    # redirect www
-    if ($host ~* www\.(.*)) {
-      set $host_without_www $1;
-      rewrite ^(.*)$ https://$host_without_www$1 permanent; # $1 contains '/foo', not 'www.mydomain.com/foo'
-    }
-    
-    access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-access.log;
-    error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-error.log;
-    
-    location / {
-      proxy_pass             http://varnish;
-      proxy_redirect         http://varnish/ http://$host:$server_port/;
-      proxy_set_header       Host $host;
-      proxy_set_header       X-Real-IP $remote_addr;
-      proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header       X-Client-Verify SUCCESS;
-      proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
-      proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
-    }
-  }
-  <% end %>
-  
-  <% if @node[:nginx][:varnish_proxy] %>
-  server {
-    listen 4950;
-    ssl on;
-    ssl_certificate /etc/ssl/certs/<%= @node[:nginx][:ssl_cert_name] %>;
-    ssl_certificate_key /etc/ssl/private/<%= @node[:nginx][:ssl_cert_key_name] %>;
-
-    ssl_protocols SSLv3 TLSv1;
-    ssl_ciphers HIGH:!MEDIUM:!LOW:+TLSv1:!SSLv2:+SSLv3:!ADH:!aNULL:!eNULL:!NULL:!EXP:RC4+RSA;
-
-    server_name <%= @node[:nginx][:host_name] %>;
-    
-    auth_basic            "Restricted";
-    auth_basic_user_file  auth/htpasswd;
-    
-    access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/munin-access.log;
-    error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/munin-error.log;
-    
-    location / {
-      root  /var/www/munin;
-    }
-  }
-  <% end %>
-    
 
   include <%= @node[:nginx][:dir] %>/conf.d/*.conf;
-  #include <%= @node[:nginx][:dir] %>/sites-enabled/*;
+  include <%= @node[:nginx][:dir] %>/sites-enabled/*;
 }
+
